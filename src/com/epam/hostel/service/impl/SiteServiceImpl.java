@@ -19,10 +19,19 @@ import java.util.Date;
  */
 public class SiteServiceImpl implements SiteService {
 
+    private static final int LOGIN_MAX_LENGTH = 40;
+    private static final int PASSWORD_MAX_LENGTH = 45;
+    private static final int SERIES_MAX_LENGTH = 2;
+    private static final int SURNAME_MAX_LENGTH = 40;
+    private static final int NAME_MAX_LENGTH = 40;
+    private static final int LASTNAME_MAX_LENGTH = 40;
+
+
     @Override
     public User logIn(String login, String password) throws ServiceException {
-        if(!Validator.validateString(login)){
-            throw new ServiceException("Invalid data");
+        if(!Validator.validateString(login, LOGIN_MAX_LENGTH) ||
+                !Validator.validateString(password, PASSWORD_MAX_LENGTH)){
+            throw new ServiceException("Wrong parameters for log in");
         }
 
         DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
@@ -45,10 +54,12 @@ public class SiteServiceImpl implements SiteService {
     @Override
     public void registration(String login, String password, int identificationNumber, String series, String surname,
                              String name, String lastName, Date birthday) throws ServiceException{
-        if(!Validator.validateString(login) || !Validator.validateString(password) || !Validator.validateId(identificationNumber)
-                || !Validator.validateString(series) || !Validator.validateString(surname) || !Validator.validateString(name)
-                || !Validator.validateString(lastName) ||  birthday == null){
-            throw new ServiceException("Invalid data");
+        if(!Validator.validateString(login, LOGIN_MAX_LENGTH) || !Validator.validateString(password, PASSWORD_MAX_LENGTH) ||
+                !Validator.validateId(identificationNumber) ||
+                !Validator.validateString(series, SERIES_MAX_LENGTH) || !Validator.validateString(surname, SURNAME_MAX_LENGTH) ||
+                !Validator.validateString(name, NAME_MAX_LENGTH)
+                || !Validator.validateString(lastName, LASTNAME_MAX_LENGTH) ||  birthday == null){
+            throw new ServiceException("Wrong parameters for registration");
         }
 
         DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);

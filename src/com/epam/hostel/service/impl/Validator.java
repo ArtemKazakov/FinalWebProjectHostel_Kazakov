@@ -9,8 +9,8 @@ public class Validator {
         return value > 0;
     }
 
-    public static boolean validateString(String value){
-        if(value == null || value.isEmpty())
+    public static boolean validateString(String value, int maxLength){
+        if(value == null || value.isEmpty() || value.length() > maxLength)
             return false;
         else return true;
     }
