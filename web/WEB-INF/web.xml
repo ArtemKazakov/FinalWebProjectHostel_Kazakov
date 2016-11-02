@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+           version="2.5">
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <servlet>
+        <display-name>Controller</display-name>
+        <servlet-name>Controller</servlet-name>
+        <servlet-class>com.epam.hostel.controller.Controller</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Controller</servlet-name>
+        <url-pattern>/Controller</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <display-name>CharsetFilter</display-name>
+        <filter-name>CharsetFilter</filter-name>
+        <filter-class>com.epam.hostel.controller.filter.CharsetFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>CharsetFilter</filter-name>
+        <url-pattern>/Controller</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>com.epam.hostel.controller.listener.ConnectionPoolListener</listener-class>
+    </listener>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/Controller?command=error</location>
+    </error-page>
+</web-app>
