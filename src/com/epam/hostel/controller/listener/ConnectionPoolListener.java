@@ -9,13 +9,11 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 public class ConnectionPoolListener implements ServletContextListener {
-    // Public constructor is required by servlet spec
+
     public ConnectionPoolListener() {
     }
 
-    // -------------------------------------------------------
-    // ServletContextListener implementation
-    // -------------------------------------------------------
+
     public void contextInitialized(ServletContextEvent sce) {
         try {
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
