@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public class Controller extends HttpServlet {
 
-    private final CommandProvider provider = new CommandProvider();
+    private final CommandProvider provider = CommandProvider.getInstance();
     private static final String COMMAND = "command";
 
     private static final int PAGE_NOT_FOUND_ERROR = 404;

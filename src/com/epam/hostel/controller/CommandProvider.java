@@ -11,7 +11,7 @@ import com.epam.hostel.controller.exception.CommandNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-class CommandProvider {
+public class CommandProvider {
 
 	private static final String LOG_IN_CMD = "log_in";
 	private static final String LOG_OUT_CMD = "log_out";
@@ -19,9 +19,11 @@ class CommandProvider {
 	private static final String VIEW_ROOMS_LIST_CMD ="viewRoomsList";
 	private static final String ERROR_CMD = "error";
 
+	private static CommandProvider instance;
+
 	private Map<String, Command> commands = new HashMap<String, Command>();
 	
-	CommandProvider() {
+	private CommandProvider() {
 		commands.put(LOG_IN_CMD, new LogInCommand());
 		commands.put(LOG_OUT_CMD, new LogOutCommand());
 		commands.put(REGISTRATION_CMD, new RegistrationCommand());
@@ -31,13 +33,19 @@ class CommandProvider {
 
 	
 	public Command getCommand(String commandName) throws CommandNotFoundException{
-		Command command;
-		command = commands.get(commandName);
+		Command command = commands.get(commandName);
 		if(command != null) {
 			return command;
 		} else{
 			throw new CommandNotFoundException("Wrong command name");
 		}
+	}
+
+	public static synchronized CommandProvider getInstance() {
+		if(instance == null){
+			instance = new CommandProvider();
+		}
+		return instance;
 	}
 
 }

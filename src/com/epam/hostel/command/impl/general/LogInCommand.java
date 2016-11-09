@@ -21,10 +21,15 @@ public class LogInCommand implements Command {
 
     private static final String JSP_PAGE_PATH = "index.jsp";
 
+    private static final String USER_ID_SESSION_ATTRIBUTE = "userId";
     private static final String USER_LOGIN_SESSION_ATTRIBUTE = "userLogin";
 
     private static final String LOGIN_FORM_LOGIN_PARAM = "logInFormLogin";
     private static final String LOGIN_FORM_PASSWORD_PARAM = "logInFormPassword";
+
+    private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
+    private static final String WRONG_LOGIN_REQUEST_ATTR = "wrongLogin";
+    private static final String WRONG_PASSWORD_REQUEST_ATTR = "wrongPassword";
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
@@ -37,16 +42,17 @@ public class LogInCommand implements Command {
                 SiteService siteService = serviceFactory.getSiteService();
                 User user = siteService.logIn(logInFormLogin, logInFormPassword);
                 HttpSession session = request.getSession(true);
+                session.setAttribute(USER_ID_SESSION_ATTRIBUTE, user.getId());
                 session.setAttribute(USER_LOGIN_SESSION_ATTRIBUTE, user.getLogin());
                 response.sendRedirect(JSP_PAGE_PATH);
             } catch (ServiceWrongLoginException e){
-                request.setAttribute("status", e.getMessage());
+                request.setAttribute(WRONG_LOGIN_REQUEST_ATTR, true);
                 request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
             } catch (ServiceWrongPasswordException e){
-                request.setAttribute("status", e.getMessage());
+                request.setAttribute(WRONG_PASSWORD_REQUEST_ATTR, true);
                 request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
             } catch (ServiceException e){
-                request.setAttribute("status", e.getMessage());
+                request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);
                 request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
             }
         }

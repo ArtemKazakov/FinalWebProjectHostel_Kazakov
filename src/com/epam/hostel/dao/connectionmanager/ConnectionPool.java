@@ -1,6 +1,5 @@
 package com.epam.hostel.dao.connectionmanager;
 
-import com.epam.hostel.dao.exception.DAOException;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -8,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -19,11 +19,18 @@ public class ConnectionPool {
 
     private static final Logger LOGGER = Logger.getRootLogger();
 
-    private static final String DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
-    private static final String HOST_CONNECTION = "jdbc:mysql://localhost/hostel";
-    private static final String USER_LOGIN = "root";
-    private static final String USER_PASSWORD = "1234";
-    private static final int NUMBER_OF_CONNECTIONS = 5;
+    private static final String RESOURCE_BUNDLE_NAME = "mysql-connection";
+    private static final String DRIVER_CLASS_NAME_PROPERTY = "driverClassName";
+    private static final String HOST_CONNECTION_STRING_PROPERTY = "hostConnectionString";
+    private static final String DATABASE_NAME_PROPERTY = "databaseName";
+    private static final String USER_LOGIN_PROPERTY = "userLogin";
+    private static final String USER_PASSWORD_PROPERTY = "userPassword";
+    private static final String NUMBER_OF_CONNECTIONS_PROPERTY  = "numberOfConnections";
+
+    private String hostConnectionString;
+    private String databaseName;
+    private String userLogin;
+    private String userPassword;
 
     private volatile boolean isAvailable = false;
     private volatile boolean isInit = false;
@@ -41,10 +48,24 @@ public class ConnectionPool {
 
     public void init() throws ConnectionPoolException {
         if(!isInit) {
+            ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE_NAME);
+            String driverClassName = resourceBundle.getString(DRIVER_CLASS_NAME_PROPERTY);
+            String hostConnectionString = resourceBundle.getString(HOST_CONNECTION_STRING_PROPERTY);
+            String databaseName = resourceBundle.getString(DATABASE_NAME_PROPERTY);
+            String userLogin = resourceBundle.getString(USER_LOGIN_PROPERTY);
+            String userPassword = resourceBundle.getString(USER_PASSWORD_PROPERTY);
+            String numberOfConnectionsString = resourceBundle.getString(NUMBER_OF_CONNECTIONS_PROPERTY);
+
+            this.hostConnectionString = hostConnectionString;
+            this.databaseName = databaseName;
+            this.userLogin = userLogin;
+            this.userPassword = userPassword;
+
             try {
-                Class.forName(DRIVER_CLASS_NAME);
-                for (int i = 0; i < NUMBER_OF_CONNECTIONS; i++) {
-                    Connection newConnection = DriverManager.getConnection(HOST_CONNECTION, USER_LOGIN, USER_PASSWORD);
+                Class.forName(driverClassName);
+                for (int i = 0; i < Integer.parseInt(numberOfConnectionsString); i++) {
+                    Connection newConnection = DriverManager.getConnection(hostConnectionString + databaseName,
+                            userLogin, userPassword);
 
                     lock.lock();
                     availableConnections.add(newConnection);
@@ -125,7 +146,8 @@ public class ConnectionPool {
                 usedConnections.remove(connection);
 
                 if (connection.isClosed()) {
-                    connection = DriverManager.getConnection(HOST_CONNECTION, USER_LOGIN, USER_PASSWORD);
+                    connection = DriverManager.getConnection(hostConnectionString + databaseName,
+                            userLogin, userPassword);
 
                 } else {
                     if (!connection.getAutoCommit()) {
