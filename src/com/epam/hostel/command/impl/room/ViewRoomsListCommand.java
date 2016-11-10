@@ -21,6 +21,8 @@ public class ViewRoomsListCommand implements Command{
 
     private static final String ROOMS_ATTRIBUTE = "rooms";
 
+    private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
+
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
@@ -29,7 +31,7 @@ public class ViewRoomsListCommand implements Command{
             List<Room> rooms = roomService.getAllRooms();
             request.setAttribute(ROOMS_ATTRIBUTE, rooms);
         } catch (ServiceException e){
-            request.setAttribute("status", e.getMessage());
+            request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);
         }
         request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
     }

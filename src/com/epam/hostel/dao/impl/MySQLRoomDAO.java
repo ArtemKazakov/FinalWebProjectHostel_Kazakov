@@ -42,7 +42,7 @@ public class MySQLRoomDAO implements RoomDAO {
         } catch (InterruptedException | ConnectionPoolException e) {
             throw new DAOException("Cannot get a connection from Connection Pool", e);
         } catch (SQLException e){
-            throw new DAOException("SQL query error", e);
+            throw new DAOException("DAO layer: cannot get all rooms", e);
         } finally {
             closeResultSet(resultSet);
             closeStatement(statement);

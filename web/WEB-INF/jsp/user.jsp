@@ -1,10 +1,17 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: ASUS
+  Date: 10.11.2016
+  Time: 0:51
+  To change this template use File | Settings | File Templates.
+--%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Номера</title>
+    <title>Личный кабинет</title>
     <link rel="shortcut icon" href="img/hostel_icon.png" type="image/png">
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
@@ -54,21 +61,38 @@
     </div>
 </nav>
 
+
 <div class="container">
-    <table class="table table-striped">
-        <tr>
-            <th>Номер</th>
-            <th>Вместимость</th>
-            <th>Цена за день</th>
-        </tr>
-        <c:forEach var="room" items="${requestScope.rooms}">
-            <tr>
-                <td>${room.number}</td>
-                <td>${room.seatsNumber}</td>
-                <td>${room.perdayCost}</td>
-            </tr>
-        </c:forEach>
-    </table>
+    <div class="jumbotron">
+        <c:if test="${sessionScope.userId == requestScope.user.id}">
+            <ul>
+                <li>Логин: ${requestScope.user.login}</li>
+                <li>Пароль: ${requestScope.user.password}</li>
+                <li>Забанен: ${requestScope.user.banned}</li>
+                <li>Количество посещений: ${requestScope.user.visitsNumber}</li>
+                <li>Номер паспорта: ${requestScope.user.passport.identificationNumber}</li>
+                <li>Серия паспорта: ${requestScope.user.passport.series}</li>
+                <li>Фамилия: ${requestScope.user.passport.surname}</li>
+                <li>Имя: ${requestScope.user.passport.name}</li>
+                <li>Отчество: ${requestScope.user.passport.lastName}</li>
+                <li>Дата рождения: ${requestScope.user.passport.birthday}</li>
+
+            </ul>
+        </c:if>
+
+        <c:if test="${requestScope.serviceError}">
+            <div class="alert alert-danger fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                Ошибка сервера.
+            </div>
+        </c:if>
+        <c:if test="${requestScope.user == null}">
+            <div class="alert alert-danger fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                Пользователя не сущетвует.
+            </div>
+        </c:if>
+    </div>
 
     <hr>
 

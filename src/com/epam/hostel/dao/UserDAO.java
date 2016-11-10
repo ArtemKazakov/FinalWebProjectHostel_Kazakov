@@ -17,7 +17,11 @@ public interface UserDAO {
 
     void insert(User user) throws DAOException;
 
+    void update(User user) throws DAOException;
+
     User findByLogin(String login) throws DAOException;
+
+    User findById(int id) throws DAOException;
 
     default void closeStatement(Statement statement) throws DAOException {
         try {

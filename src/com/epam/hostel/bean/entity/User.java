@@ -10,7 +10,7 @@ public class User {
     private String password;
     private boolean banned;
     private int visitsNumber;
-    private int passportId;
+    private Passport passport;
 
     public int getId() {
         return id;
@@ -52,13 +52,14 @@ public class User {
         this.visitsNumber = visitsNumber;
     }
 
-    public int getPassportId() {
-        return passportId;
+    public Passport getPassport() {
+        return passport;
     }
 
-    public void setPassportId(int passportId) {
-        this.passportId = passportId;
+    public void setPassport(Passport passport) {
+        this.passport = passport;
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -70,9 +71,9 @@ public class User {
         if (id != user.id) return false;
         if (banned != user.banned) return false;
         if (visitsNumber != user.visitsNumber) return false;
-        if (passportId != user.passportId) return false;
         if (login != null ? !login.equals(user.login) : user.login != null) return false;
         if (password != null ? !password.equals(user.password) : user.password != null) return false;
+        if (passport != null ? !passport.equals(user.passport) : user.passport != null) return false;
 
         return true;
     }
@@ -84,9 +85,19 @@ public class User {
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (banned ? 1 : 0);
         result = 31 * result + visitsNumber;
-        result = 31 * result + passportId;
+        result = 31 * result + (passport != null ? passport.hashCode() : 0);
         return result;
     }
 
-
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", banned=" + banned +
+                ", visitsNumber=" + visitsNumber +
+                ", passport=" + passport +
+                '}';
+    }
 }

@@ -19,8 +19,7 @@ import java.util.Date;
  */
 public class SiteServiceImpl implements SiteService {
 
-    private static final int LOGIN_MAX_LENGTH = 40;
-    private static final int PASSWORD_MAX_LENGTH = 45;
+
     private static final int SERIES_MAX_LENGTH = 2;
     private static final int SURNAME_MAX_LENGTH = 40;
     private static final int NAME_MAX_LENGTH = 40;
@@ -29,10 +28,13 @@ public class SiteServiceImpl implements SiteService {
 
     @Override
     public User logIn(String login, String password) throws ServiceException {
-        if(!Validator.validateString(login, LOGIN_MAX_LENGTH) ||
-                !Validator.validateString(password, PASSWORD_MAX_LENGTH)){
-            throw new ServiceException("Wrong parameters for log in");
+        if(!Validator.validateLogin(login)){
+            throw new ServiceWrongLoginException("Wrong login");
         }
+        if(!Validator.validatePassword(password)){
+            throw new ServiceWrongPasswordException("Wrong password");
+        }
+
 
         DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
         UserDAO dao = factory.getUserDAO();
@@ -54,8 +56,8 @@ public class SiteServiceImpl implements SiteService {
     @Override
     public void registration(String login, String password, int identificationNumber, String series, String surname,
                              String name, String lastName, Date birthday) throws ServiceException{
-        if(!Validator.validateString(login, LOGIN_MAX_LENGTH) || !Validator.validateString(password, PASSWORD_MAX_LENGTH) ||
-                !Validator.validateId(identificationNumber) ||
+        if(!Validator.validateLogin(login) || !Validator.validatePassword(password) ||
+                !Validator.validateInt(identificationNumber) ||
                 !Validator.validateString(series, SERIES_MAX_LENGTH) || !Validator.validateString(surname, SURNAME_MAX_LENGTH) ||
                 !Validator.validateString(name, NAME_MAX_LENGTH)
                 || !Validator.validateString(lastName, LASTNAME_MAX_LENGTH) ||  birthday == null){
@@ -81,11 +83,12 @@ public class SiteServiceImpl implements SiteService {
             passport.setBirthday(birthday);
 
             int passportId = passportDAO.insert(passport);
+            passport.setId(passportId);
 
             User user = new User();
             user.setLogin(login);
             user.setPassword(password);
-            user.setPassportId(passportId);
+            user.setPassport(passport);
 
             userDAO.insert(user);
 

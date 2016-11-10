@@ -35,23 +35,28 @@
                 <li><a href="Controller?command=viewRoomsList">Номера</a></li>
             </ul>
             <c:if test="${sessionScope.userId == null}">
-                <form class="navbar-form navbar-right" action="Controller" method="post">
-                    <input type="hidden" name="command" value="log_in" />
-                    <div class="form-group">
-                        <input type="text" name="logInFormLogin" placeholder="Логин" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <input type="password" name="logInFormPassword" placeholder="Пароль" class="form-control">
-                    </div>
-                    <button type="submit" class="btn btn-success">Войти</button>
-                    <a class="btn btn-success" href="Controller?command=registration">Зарегистрироваться</a>
-                </form>
+                <ul class="nav navbar-nav navbar-right" >
+                    <li><form class="navbar-form" action="Controller" method="post">
+                        <input type="hidden" name="command" value="log_in" />
+                        <div class="form-group">
+                            <input type="text" name="logInFormLogin" placeholder="Логин" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="logInFormPassword" placeholder="Пароль" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-success">Войти</button>
+                    </form></li>
+                    <li><a href="Controller?command=registration"><span class="glyphicon glyphicon-user"></span> Зарегистрироваться</a></li>
+                </ul>
             </c:if>
             <c:if test="${sessionScope.userId != null}">
-                <form class="navbar-form navbar-right" action="Controller" method="post">
-                    <input type="hidden" name="command" value="log_out" />
-                    <button type="submit" class="btn btn-success">Выйти</button>
-                </form>
+                <ul class="nav navbar-nav navbar-right" >
+                    <li><form class="navbar-form navbar-right" action="Controller" method="post">
+                        <input type="hidden" name="command" value="log_out" />
+                        <button type="submit" class="btn btn-success">Выйти</button>
+                    </form></li>
+                    <li><a href="Controller?command=viewUser&id=${sessionScope.userId}"><span class="glyphicon glyphicon-user"></span> Мой аккаунт</a></li>
+                </ul>
             </c:if>
         </div>
     </div>

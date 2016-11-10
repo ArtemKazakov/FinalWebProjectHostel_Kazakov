@@ -1,7 +1,6 @@
 package com.epam.hostel.dao;
 
 import com.epam.hostel.bean.entity.Passport;
-import com.epam.hostel.bean.entity.User;
 import com.epam.hostel.dao.exception.DAOException;
 import org.apache.log4j.Logger;
 
@@ -16,6 +15,10 @@ public interface PassportDAO {
     Logger LOGGER = Logger.getRootLogger();
 
     int insert(Passport passport) throws DAOException;
+
+    void update(Passport passport) throws DAOException;
+
+    Passport findById(int id) throws DAOException;
 
     default void closeStatement(Statement statement) throws DAOException{
         try {

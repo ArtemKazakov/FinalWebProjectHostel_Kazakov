@@ -4,9 +4,11 @@ package com.epam.hostel.service.factory;
 import com.epam.hostel.service.PoolService;
 import com.epam.hostel.service.RoomService;
 import com.epam.hostel.service.SiteService;
+import com.epam.hostel.service.UserService;
 import com.epam.hostel.service.impl.PoolServiceImpl;
 import com.epam.hostel.service.impl.RoomServiceImpl;
 import com.epam.hostel.service.impl.SiteServiceImpl;
+import com.epam.hostel.service.impl.UserServiceImpl;
 
 public class ServiceFactory {
 	private static final ServiceFactory instance = new ServiceFactory();
@@ -14,7 +16,8 @@ public class ServiceFactory {
 	private final SiteService siteService = new SiteServiceImpl();
 	private final PoolService poolService = new PoolServiceImpl();
 	private final RoomService roomService = new RoomServiceImpl();
-	
+	private final UserService userServiceService = new UserServiceImpl();
+
 	private ServiceFactory(){}
 	
 	
@@ -32,5 +35,9 @@ public class ServiceFactory {
 
 	public RoomService getRoomService() {
 		return roomService;
+	}
+
+	public UserService getUserServiceService() {
+		return userServiceService;
 	}
 }

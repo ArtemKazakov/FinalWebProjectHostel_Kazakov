@@ -22,7 +22,6 @@ public class LogInCommand implements Command {
     private static final String JSP_PAGE_PATH = "index.jsp";
 
     private static final String USER_ID_SESSION_ATTRIBUTE = "userId";
-    private static final String USER_LOGIN_SESSION_ATTRIBUTE = "userLogin";
 
     private static final String LOGIN_FORM_LOGIN_PARAM = "logInFormLogin";
     private static final String LOGIN_FORM_PASSWORD_PARAM = "logInFormPassword";
@@ -43,7 +42,6 @@ public class LogInCommand implements Command {
                 User user = siteService.logIn(logInFormLogin, logInFormPassword);
                 HttpSession session = request.getSession(true);
                 session.setAttribute(USER_ID_SESSION_ATTRIBUTE, user.getId());
-                session.setAttribute(USER_LOGIN_SESSION_ATTRIBUTE, user.getLogin());
                 response.sendRedirect(JSP_PAGE_PATH);
             } catch (ServiceWrongLoginException e){
                 request.setAttribute(WRONG_LOGIN_REQUEST_ATTR, true);
