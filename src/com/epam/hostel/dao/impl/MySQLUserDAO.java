@@ -20,7 +20,7 @@ public class MySQLUserDAO implements UserDAO{
 			"VALUES (?, ?, ?)";
 
 	private static final String UPDATE_USER_QUERY = "UPDATE `clients` " +
-			"SET `login` = ?, `password` = ?, `id_passport` = ? " +
+			"SET `login` = ?, `password` = ? " +
 			"WHERE `id_client` = ?";
 
 	private static final String SELECT_USER_BY_LOGIN_QUERY = "SELECT * FROM `clients` WHERE `login` = ? ";
@@ -69,8 +69,7 @@ public class MySQLUserDAO implements UserDAO{
 
 			preparedStatement.setString(1, user.getLogin());
 			preparedStatement.setString(2, user.getPassword());
-			preparedStatement.setInt(3, user.getPassport().getId());
-			preparedStatement.setInt(4, user.getId());
+			preparedStatement.setInt(3, user.getId());
 
 			preparedStatement.executeUpdate();
 		} catch (InterruptedException | ConnectionPoolException e) {

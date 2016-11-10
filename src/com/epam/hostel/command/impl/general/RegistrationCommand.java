@@ -5,6 +5,7 @@ import com.epam.hostel.command.Command;
 import com.epam.hostel.service.SiteService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.exception.ServiceWrongLoginException;
+import com.epam.hostel.service.exception.ServiceWrongPasswordException;
 import com.epam.hostel.service.factory.ServiceFactory;
 
 import javax.servlet.ServletException;
@@ -24,16 +25,17 @@ public class RegistrationCommand implements Command {
 
     private static final String REGISTRATION_FORM_LOGIN_PARAM = "registrationFormLogin";
     private static final String REGISTRATION_FORM_PASSWORD_PARAM = "registrationFormPassword";
-    private static final String REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM = "registrationIdentificationNumber";
+    private static final String REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM = "registrationFormIdentificationNumber";
     private static final String REGISTRATION_FORM_SERIES_PARAM = "registrationFormSeries";
     private static final String REGISTRATION_FORM_SURNAME_PARAM = "registrationFormSurname";
     private static final String REGISTRATION_FORM_NAME_PARAM = "registrationFormName";
     private static final String REGISTRATION_FORM_LAST_NAME_PARAM = "registrationFormLastName";
-    private static final String REGISTRATION_FORM_BIRTHDAY_DATE_PARAM = "registrationBirthdayDate";
+    private static final String REGISTRATION_FORM_BIRTHDAY_DATE_PARAM = "registrationFormBirthdayDate";
 
     private static final String REGISTRATION_SUCCESS_REQUEST_ATTR = "registrationSuccess";
     private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
     private static final String WRONG_LOGIN_REQUEST_ATTR = "wrongLogin";
+    private static final String WRONG_PASSWORD_REQUEST_ATTR = "wrongPassword";
 
     private static final String BIRTHDAY_DATE_FORMAT = "yyyy-MM-dd";
 
@@ -41,11 +43,11 @@ public class RegistrationCommand implements Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String registrationFormLogin = request.getParameter(REGISTRATION_FORM_LOGIN_PARAM);
         String registrationFormPassword = request.getParameter(REGISTRATION_FORM_PASSWORD_PARAM);
-        String registrationIdentificationNumberString = request.getParameter(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM);
-        int registrationIdentificationNumber = -1;
-        if(registrationIdentificationNumberString != null){
+        String registrationFormIdentificationNumberString = request.getParameter(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM);
+        int registrationFormIdentificationNumber = -1;
+        if(registrationFormIdentificationNumberString != null){
             try{
-                registrationIdentificationNumber = Integer.parseInt(registrationIdentificationNumberString);
+                registrationFormIdentificationNumber = Integer.parseInt(registrationFormIdentificationNumberString);
             } catch (NumberFormatException e){
                 e.printStackTrace();
             }
@@ -54,12 +56,12 @@ public class RegistrationCommand implements Command {
         String registrationFormSurname = request.getParameter(REGISTRATION_FORM_SURNAME_PARAM);
         String registrationFormName = request.getParameter(REGISTRATION_FORM_NAME_PARAM);
         String registrationFormLastName = request.getParameter(REGISTRATION_FORM_LAST_NAME_PARAM);
-        String registrationBirthdayDateString = request.getParameter(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM);
+        String registrationFormBirthdayDateString = request.getParameter(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM);
         SimpleDateFormat format = new SimpleDateFormat(BIRTHDAY_DATE_FORMAT);
-        Date registrationBirthdayDate = null;
-        if (registrationBirthdayDateString != null) {
+        Date registrationFormBirthdayDate = null;
+        if (registrationFormBirthdayDateString != null) {
             try {
-                registrationBirthdayDate = format.parse(request.getParameter(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM));
+                registrationFormBirthdayDate = format.parse(request.getParameter(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM));
             } catch (ParseException | NullPointerException e) {
                 e.printStackTrace();
             }
@@ -71,27 +73,36 @@ public class RegistrationCommand implements Command {
             try {
                 ServiceFactory serviceFactory = ServiceFactory.getInstance();
                 SiteService siteService = serviceFactory.getSiteService();
-                siteService.registration(registrationFormLogin, registrationFormPassword, registrationIdentificationNumber,
+                siteService.registration(registrationFormLogin, registrationFormPassword, registrationFormIdentificationNumber,
                         registrationFormSeries, registrationFormSurname, registrationFormName, registrationFormLastName,
-                        registrationBirthdayDate);
+                        registrationFormBirthdayDate);
                 request.setAttribute(REGISTRATION_SUCCESS_REQUEST_ATTR, true);
             } catch (ServiceWrongLoginException e){
                 request.setAttribute(REGISTRATION_FORM_LOGIN_PARAM, registrationFormLogin);
-                request.setAttribute(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM, registrationIdentificationNumberString);
+                request.setAttribute(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM, registrationFormIdentificationNumber);
                 request.setAttribute(REGISTRATION_FORM_SERIES_PARAM, registrationFormSeries);
                 request.setAttribute(REGISTRATION_FORM_SURNAME_PARAM, registrationFormSurname);
                 request.setAttribute(REGISTRATION_FORM_LAST_NAME_PARAM, registrationFormLastName);
                 request.setAttribute(REGISTRATION_FORM_NAME_PARAM, registrationFormName);
-                request.setAttribute(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM, registrationBirthdayDateString);
+                request.setAttribute(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM, registrationFormBirthdayDateString);
                 request.setAttribute(WRONG_LOGIN_REQUEST_ATTR, true);
+            } catch (ServiceWrongPasswordException e){
+                request.setAttribute(REGISTRATION_FORM_LOGIN_PARAM, registrationFormLogin);
+                request.setAttribute(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM, registrationFormIdentificationNumber);
+                request.setAttribute(REGISTRATION_FORM_SERIES_PARAM, registrationFormSeries);
+                request.setAttribute(REGISTRATION_FORM_SURNAME_PARAM, registrationFormSurname);
+                request.setAttribute(REGISTRATION_FORM_LAST_NAME_PARAM, registrationFormLastName);
+                request.setAttribute(REGISTRATION_FORM_NAME_PARAM, registrationFormName);
+                request.setAttribute(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM, registrationFormBirthdayDateString);
+                request.setAttribute(WRONG_PASSWORD_REQUEST_ATTR, true);
             } catch (ServiceException e){
                 request.setAttribute(REGISTRATION_FORM_LOGIN_PARAM, registrationFormLogin);
-                request.setAttribute(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM, registrationIdentificationNumberString);
+                request.setAttribute(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM, registrationFormIdentificationNumber);
                 request.setAttribute(REGISTRATION_FORM_SERIES_PARAM, registrationFormSeries);
                 request.setAttribute(REGISTRATION_FORM_SURNAME_PARAM, registrationFormSurname);
                 request.setAttribute(REGISTRATION_FORM_LAST_NAME_PARAM, registrationFormLastName);
                 request.setAttribute(REGISTRATION_FORM_NAME_PARAM, registrationFormName);
-                request.setAttribute(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM, registrationBirthdayDateString);
+                request.setAttribute(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM, registrationFormBirthdayDateString);
                 request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);
             }
         }

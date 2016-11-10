@@ -64,35 +64,98 @@
 
 <div class="container">
     <div class="jumbotron">
-        <c:if test="${sessionScope.userId == requestScope.user.id}">
-            <ul>
-                <li>Логин: ${requestScope.user.login}</li>
-                <li>Пароль: ${requestScope.user.password}</li>
-                <li>Забанен: ${requestScope.user.banned}</li>
-                <li>Количество посещений: ${requestScope.user.visitsNumber}</li>
-                <li>Номер паспорта: ${requestScope.user.passport.identificationNumber}</li>
-                <li>Серия паспорта: ${requestScope.user.passport.series}</li>
-                <li>Фамилия: ${requestScope.user.passport.surname}</li>
-                <li>Имя: ${requestScope.user.passport.name}</li>
-                <li>Отчество: ${requestScope.user.passport.lastName}</li>
-                <li>Дата рождения: ${requestScope.user.passport.birthday}</li>
+        <div id="user-info">
+            <c:if test="${sessionScope.userId == requestScope.user.id}">
+                <ul>
+                    <li>Логин: ${requestScope.user.login}</li>
+                    <li>Пароль: ${requestScope.user.password}</li>
+                    <li>Забанен: ${requestScope.user.banned}</li>
+                    <li>Количество посещений: ${requestScope.user.visitsNumber}</li>
+                    <li>Номер паспорта: ${requestScope.user.passport.identificationNumber}</li>
+                    <li>Серия паспорта: ${requestScope.user.passport.series}</li>
+                    <li>Фамилия: ${requestScope.user.passport.surname}</li>
+                    <li>Имя: ${requestScope.user.passport.name}</li>
+                    <li>Отчество: ${requestScope.user.passport.lastName}</li>
+                    <li>Дата рождения: ${requestScope.user.passport.birthday}</li>
+                    <a class="btn btn-default" onclick="document.getElementById('user-edit').style.display='block'; document.getElementById('user-info').style.display='none';">Редактировать</a>
+                </ul>
+            </c:if>
 
-            </ul>
-        </c:if>
-
-        <c:if test="${requestScope.serviceError}">
-            <div class="alert alert-danger fade in">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                Ошибка сервера.
-            </div>
-        </c:if>
-        <c:if test="${requestScope.user == null}">
-            <div class="alert alert-danger fade in">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                Пользователя не сущетвует.
-            </div>
-        </c:if>
-    </div>
+            <c:if test="${requestScope.serviceError}">
+                <div class="alert alert-danger fade in">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    Ошибка сервера.
+                </div>
+            </c:if>
+            <c:if test="${requestScope.user == null}">
+                <div class="alert alert-danger fade in">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    Пользователя не сущетвует.
+                </div>
+            </c:if>
+            <c:if test="${requestScope.editSuccess}">
+                <div class="alert alert-success fade in">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    Редактирование прошло успешно.
+                </div>
+            </c:if>
+            <c:if test="${requestScope.wrongLogin}">
+                <div class="alert alert-danger fade in">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    Данный логин уже занят или введен некоректно.
+                </div>
+            </c:if>
+            <c:if test="${requestScope.wrongPassword}">
+                <div class="alert alert-danger fade in">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    Неверный пароль.
+                </div>
+            </c:if>
+        </div>
+        <div id="user-edit">
+            <form action="Controller" method="post">
+                <input type="hidden" name="command" value="editUser" />
+                <input type="hidden" name="userId" value="${sessionScope.userId}">
+                <div class="form-group">
+                    <label for="login">Логин:</label>
+                    <input name="editFormLogin" type="text" value="${requestScope.user.login}" minlength="1" maxlength="40" class="form-control" id="login">
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input name="editFormPassword" type="password" value="${requestScope.user.password}" minlength="1" maxlength="45" class="form-control" id="password" >
+                </div>
+                <div class="form-group">
+                    <label for="identification-number">Номер паспорта:</label>
+                    <input name="editFormIdentificationNumber" type="text" value="${requestScope.user.passport.identificationNumber}" minlength="7" maxlength="7" class="form-control" id="identification-number" >
+                </div>
+                <div class="form-group">
+                    <label for="series">Серия паспорта:</label>
+                    <input name="editFormSeries" type="text" value="${requestScope.user.passport.series}" minlength="2" maxlength="2" class="form-control" id="series" >
+                </div>
+                <div class="form-group">
+                    <label for="surtname">Фамилия:</label>
+                    <input name="editFormSurname" type="text" value="${requestScope.user.passport.surname}" minlength="1" maxlength="40" class="form-control" id="surtname" >
+                </div>
+                <div class="form-group">
+                    <label for="name">Имя:</label>
+                    <input name="editFormName" type="text" value="${requestScope.user.passport.name}" minlength="1" maxlength="40" class="form-control" id="name" >
+                </div>
+                <div class="form-group">
+                    <label for="lastname">Отчество:</label>
+                    <input name="editFormLastName" type="text" value="${requestScope.user.passport.lastName}" minlength="1" maxlength="40" class="form-control" id="lastname" >
+                </div>
+                <div class="form-group">
+                    <label for="date">Дата:</label>
+                    <input name="editFormBirthdayDate" type="date" value="${requestScope.user.passport.birthday}"
+                           max="1998-01-01" min="1920-01-01" class="form-control" id="date">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-default" onclick="document.getElementById('user-edit').style.display='none'; document.getElementById('user-info').style.display='block';">Сохранить</button>
+                </div>
+                <a class="btn btn-default" onclick="document.getElementById('user-edit').style.display='none'; document.getElementById('user-info').style.display='block';">Отмена</a>
+            </form>
+        </div>
+        </div>
 
     <hr>
 

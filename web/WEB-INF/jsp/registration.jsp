@@ -12,7 +12,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Хостел</title>
+    <title>Регистрация</title>
     <link rel="shortcut icon" href="img/hostel_icon.png" type="image/png">
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
@@ -76,7 +76,7 @@
             </div>
             <div class="form-group">
                 <label for="identification-number">Номер паспорта:</label>
-                <input name="registrationIdentificationNumber" type="text" value="${requestScope.registrationIdentificationNumber}" minlength="7" maxlength="7" class="form-control" id="identification-number" >
+                <input name="registrationFormIdentificationNumber" type="text" value="${requestScope.registrationIdentificationNumber}" minlength="7" maxlength="7" class="form-control" id="identification-number" >
             </div>
             <div class="form-group">
                 <label for="series">Серия паспорта:</label>
@@ -96,7 +96,7 @@
             </div>
             <div class="form-group">
                 <label for="date">Дата:</label>
-                <input name="registrationBirthdayDate" type="date" value="${requestScope.registrationBirthdayDate}"
+                <input name="registrationFormBirthdayDate" type="date" value="${requestScope.registrationFormBirthdayDate}"
                        max="1998-01-01" min="1920-01-01" class="form-control" id="date">
             </div>
             <div class="form-group">
@@ -107,13 +107,19 @@
         <c:if test="${requestScope.registrationSuccess}">
             <div class="alert alert-success fade in">
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                    Регистрацияпрошла успешно.
+                    Регистрация прошла успешно.
             </div>
         </c:if>
         <c:if test="${requestScope.wrongLogin}">
             <div class="alert alert-danger fade in">
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                    Данный логин уже занят.
+                    Данный логин уже занят или введен некоректно.
+            </div>
+        </c:if>
+        <c:if test="${requestScope.wrongPassword}">
+            <div class="alert alert-danger fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                Неверный пароль.
             </div>
         </c:if>
         <c:if test="${requestScope.serviceError}">

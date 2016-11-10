@@ -6,6 +6,7 @@ import com.epam.hostel.command.impl.general.LogInCommand;
 import com.epam.hostel.command.impl.general.LogOutCommand;
 import com.epam.hostel.command.impl.general.RegistrationCommand;
 import com.epam.hostel.command.impl.room.ViewRoomsListCommand;
+import com.epam.hostel.command.impl.user.EditUserCommand;
 import com.epam.hostel.command.impl.user.ViewUserCommand;
 import com.epam.hostel.controller.exception.CommandNotFoundException;
 
@@ -20,7 +21,7 @@ public class CommandProvider {
 	private static final String VIEW_ROOMS_LIST_CMD ="viewRoomsList";
 	private static final String ERROR_CMD = "error";
 	private static final String VIEW_USER_CMD = "viewUser";
-
+	private static final String EDIT_USER_CMD = "editUser";
 
 	private static CommandProvider instance;
 
@@ -33,6 +34,7 @@ public class CommandProvider {
 		commands.put(VIEW_ROOMS_LIST_CMD, new ViewRoomsListCommand());
 		commands.put(ERROR_CMD, new ErrorCommand());
 		commands.put(VIEW_USER_CMD, new ViewUserCommand());
+		commands.put(EDIT_USER_CMD, new EditUserCommand());
 	}
 
 	

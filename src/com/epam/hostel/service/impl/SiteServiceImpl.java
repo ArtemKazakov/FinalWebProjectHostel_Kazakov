@@ -19,7 +19,6 @@ import java.util.Date;
  */
 public class SiteServiceImpl implements SiteService {
 
-
     private static final int SERIES_MAX_LENGTH = 2;
     private static final int SURNAME_MAX_LENGTH = 40;
     private static final int NAME_MAX_LENGTH = 40;
@@ -56,8 +55,13 @@ public class SiteServiceImpl implements SiteService {
     @Override
     public void registration(String login, String password, int identificationNumber, String series, String surname,
                              String name, String lastName, Date birthday) throws ServiceException{
-        if(!Validator.validateLogin(login) || !Validator.validatePassword(password) ||
-                !Validator.validateInt(identificationNumber) ||
+        if(!Validator.validateLogin(login)){
+            throw new ServiceWrongLoginException("Wrong login");
+        }
+        if(!Validator.validatePassword(password)){
+            throw new ServiceWrongPasswordException("Wrong password");
+        }
+        if(!Validator.validateInt(identificationNumber) ||
                 !Validator.validateString(series, SERIES_MAX_LENGTH) || !Validator.validateString(surname, SURNAME_MAX_LENGTH) ||
                 !Validator.validateString(name, NAME_MAX_LENGTH)
                 || !Validator.validateString(lastName, LASTNAME_MAX_LENGTH) ||  birthday == null){
