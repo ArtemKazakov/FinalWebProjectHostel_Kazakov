@@ -17,6 +17,10 @@ public interface RoomDAO {
 
     List<Room> getAllRooms() throws DAOException;
 
+    // дефолтные методы - это конечно хорошо, только здесь они совсем не к месту
+    // RoomDAO задает поведения безотносительно источника данных
+    // и вдруг получает метод от источника зависящие
+    // переноси в другой интерфейс и клади его в impl
     default void closeStatement(Statement statement) throws DAOException {
         try {
             if (statement != null) {
