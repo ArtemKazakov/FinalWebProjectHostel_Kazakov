@@ -47,6 +47,8 @@ public class CommandProvider {
 		}
 	}
 
+	// в реальности, такие синглтоны лучше делать чере final static поля
+	// у тебя же нет верояности, что объект этого класса не понадобится
 	public static synchronized CommandProvider getInstance() {
 		if(instance == null){
 			instance = new CommandProvider();
