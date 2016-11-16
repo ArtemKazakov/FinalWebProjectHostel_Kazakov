@@ -20,7 +20,7 @@ public class RoomServiceImpl implements RoomService{
         List<Room> rooms = null;
 
         try{
-            rooms = dao.getAllRooms();
+            rooms = dao.selectAll();
             return rooms;
         } catch (DAOException e) {
             throw new ServiceException("Service layer: cannot get all rooms", e);

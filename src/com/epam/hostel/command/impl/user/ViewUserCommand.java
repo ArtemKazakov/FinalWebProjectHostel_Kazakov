@@ -9,6 +9,7 @@ import com.epam.hostel.service.factory.ServiceFactory;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -20,6 +21,7 @@ public class ViewUserCommand implements Command {
     private static final String JSP_PAGE_PATH = "WEB-INF/jsp/user.jsp";
 
     private static final String USER_ID_SESSION_ATTRIBUTE = "userId";
+    private static final String USER_ROLE_SESSION_ATTRIBUTE = "userRole";
 
     private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
     private static final String USER_REQUEST_ATTR = "user";
@@ -30,6 +32,12 @@ public class ViewUserCommand implements Command {
         int id = (idStr == null) ? -1 : Integer.parseInt(idStr);
 
         if(id == -1){
+            response.sendRedirect(MAIN_PAGE);
+            return;
+        }
+
+        HttpSession session = request.getSession(false);
+        if((Boolean)session.getAttribute(USER_ROLE_SESSION_ATTRIBUTE)){
             response.sendRedirect(MAIN_PAGE);
             return;
         }

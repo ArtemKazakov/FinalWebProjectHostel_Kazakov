@@ -1,10 +1,6 @@
 package com.epam.hostel.dao.factory;
 
-
-import com.epam.hostel.dao.PassportDAO;
-import com.epam.hostel.dao.PoolDAO;
-import com.epam.hostel.dao.RoomDAO;
-import com.epam.hostel.dao.UserDAO;
+import com.epam.hostel.dao.*;
 
 public abstract class DAOFactory {
 
@@ -24,6 +20,9 @@ public abstract class DAOFactory {
 
 	public abstract RoomDAO getRoomDAO();
 
+	public abstract DiscountDAO getDiscountDAO ();
+
+	public abstract RequestDAO getRequestDAO();
 
 	public enum Factories {
 		MYSQL

@@ -11,6 +11,7 @@ public class User {
     private boolean banned;
     private int visitsNumber;
     private Passport passport;
+    private boolean admin;
 
     public int getId() {
         return id;
@@ -60,6 +61,13 @@ public class User {
         this.passport = passport;
     }
 
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -71,6 +79,7 @@ public class User {
         if (id != user.id) return false;
         if (banned != user.banned) return false;
         if (visitsNumber != user.visitsNumber) return false;
+        if (admin != user.admin) return false;
         if (login != null ? !login.equals(user.login) : user.login != null) return false;
         if (password != null ? !password.equals(user.password) : user.password != null) return false;
         if (passport != null ? !passport.equals(user.passport) : user.passport != null) return false;
@@ -86,6 +95,7 @@ public class User {
         result = 31 * result + (banned ? 1 : 0);
         result = 31 * result + visitsNumber;
         result = 31 * result + (passport != null ? passport.hashCode() : 0);
+        result = 31 * result + (admin ? 1 : 0);
         return result;
     }
 
@@ -98,6 +108,7 @@ public class User {
                 ", banned=" + banned +
                 ", visitsNumber=" + visitsNumber +
                 ", passport=" + passport +
+                ", admin=" + admin +
                 '}';
     }
 }

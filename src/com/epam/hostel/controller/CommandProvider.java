@@ -23,7 +23,7 @@ public class CommandProvider {
 	private static final String VIEW_USER_CMD = "viewUser";
 	private static final String EDIT_USER_CMD = "editUser";
 
-	private static CommandProvider instance;
+	private static final CommandProvider INSTANCE = new CommandProvider();
 
 	private Map<String, Command> commands = new HashMap<String, Command>();
 	
@@ -47,11 +47,8 @@ public class CommandProvider {
 		}
 	}
 
-	public static synchronized CommandProvider getInstance() {
-		if(instance == null){
-			instance = new CommandProvider();
-		}
-		return instance;
+	public static CommandProvider getInstance() {
+		return INSTANCE;
 	}
 
 }

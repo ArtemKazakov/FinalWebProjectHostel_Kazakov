@@ -23,7 +23,9 @@ public class MySQLUserDAO implements UserDAO{
 			"SET `login` = ?, `password` = ? " +
 			"WHERE `id_client` = ?";
 
-	private static final String SELECT_USER_BY_LOGIN_QUERY = "SELECT * FROM `clients` WHERE `login` = ? ";
+	private static final String SELECT_ADMINISTRATOR_BY_LOGIN_QUERY = "SELECT * FROM `administrators` WHERE `login` = ? ";
+
+	private static final String SELECT_CLIENT_BY_LOGIN_QUERY = "SELECT * FROM `clients` WHERE `login` = ? ";
 
 	private static final String SELECT_USER_BY_ID_QUERY = "SELECT * FROM `clients` WHERE `id_client` = ? ";
 
@@ -40,10 +42,9 @@ public class MySQLUserDAO implements UserDAO{
 			preparedStatement.setString(2, user.getPassword());
 			preparedStatement.setInt(3, user.getPassport().getId());
 
-
 			preparedStatement.executeUpdate();
 		} catch (InterruptedException | ConnectionPoolException e) {
-			throw new DAOException("Cannot get a connection from Connection Pool", e);
+			LOGGER.error("Can not get connection from connection pool");
 		} catch (SQLException e){
 			throw new DAOException("DAO layer: cannot insert user", e);
 		} finally {
@@ -52,7 +53,7 @@ public class MySQLUserDAO implements UserDAO{
 				try {
 					connectionPool.freeConnection(connection);
 				} catch (SQLException | ConnectionPoolException e) {
-					throw new DAOException("Cannot free a connection from Connection Pool", e);
+					LOGGER.error("Can not free connection from connection pool");
 				}
 			}
 		}
@@ -73,7 +74,7 @@ public class MySQLUserDAO implements UserDAO{
 
 			preparedStatement.executeUpdate();
 		} catch (InterruptedException | ConnectionPoolException e) {
-			throw new DAOException("Cannot get a connection from Connection Pool", e);
+			LOGGER.error("Can not get connection from connection pool");
 		} catch (SQLException e){
 			throw new DAOException("DAO layer: cannot update user", e);
 		} finally {
@@ -82,7 +83,7 @@ public class MySQLUserDAO implements UserDAO{
 				try {
 					connectionPool.freeConnection(connection);
 				} catch (SQLException | ConnectionPoolException e) {
-					throw new DAOException("Cannot free a connection from Connection Pool", e);
+					LOGGER.error("Can not free connection from connection pool");
 				}
 			}
 		}
@@ -92,39 +93,59 @@ public class MySQLUserDAO implements UserDAO{
 	public User findByLogin(String login) throws DAOException {
 		ConnectionPool connectionPool = ConnectionPool.getInstance();
 		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		ResultSet resultSet = null;
+		PreparedStatement preparedStatementAdministrator = null;
+		ResultSet resultSetAdministrator = null;
+		PreparedStatement preparedStatementClient = null;
+		ResultSet resultSetClient = null;
 		User user = null;
 		try{
 			connection = connectionPool.getConnection();
-			preparedStatement = connection.prepareStatement(SELECT_USER_BY_LOGIN_QUERY);
+			preparedStatementAdministrator = connection.prepareStatement(SELECT_ADMINISTRATOR_BY_LOGIN_QUERY);
 
-			preparedStatement.setString(1, login);
-			resultSet = preparedStatement.executeQuery();
+			preparedStatementAdministrator.setString(1, login);
+			resultSetAdministrator = preparedStatementAdministrator.executeQuery();
 
-			if(resultSet.next()){
+			if(!resultSetAdministrator.next()){
+				preparedStatementClient = connection.prepareStatement(SELECT_CLIENT_BY_LOGIN_QUERY);
+
+				preparedStatementClient.setString(1, login);
+				resultSetClient = preparedStatementClient.executeQuery();
+
+				if(resultSetClient.next()){
+					user = new User();
+					user.setId(resultSetClient.getInt(1));
+					user.setLogin(resultSetClient.getString(2));
+					user.setPassword(resultSetClient.getString(3));
+					user.setAdmin(false);
+				}
+			}
+			else{
 				user = new User();
-				user.setId(resultSet.getInt(1));
-				user.setLogin(resultSet.getString(2));
-				user.setPassword(resultSet.getString(3));
+				user.setId(resultSetAdministrator.getInt(1));
+				user.setLogin(resultSetAdministrator.getString(2));
+				user.setPassword(resultSetAdministrator.getString(3));
+				user.setAdmin(true);
 			}
 
-			return user;
 		} catch (InterruptedException | ConnectionPoolException e) {
-			throw new DAOException("Cannot get a connection from Connection Pool", e);
+			LOGGER.error("Can not get connection from connection pool");
 		} catch (SQLException e){
 			throw new DAOException("DAO layer: cannot find user by login", e);
 		} finally {
-			closeResultSet(resultSet);
-			closeStatement(preparedStatement);
+			closeResultSet(resultSetAdministrator);
+			closeStatement(preparedStatementAdministrator);
+			closeResultSet(resultSetClient);
+			closeStatement(preparedStatementClient);
 			if (connection != null) {
 				try {
 					connectionPool.freeConnection(connection);
 				} catch (SQLException | ConnectionPoolException e) {
-					throw new DAOException("Cannot free a connection from Connection Pool", e);
+					LOGGER.error("Can not free connection from connection pool");
 				}
 			}
 		}
+
+		return user;
 	}
 
 	@Override
@@ -153,9 +174,8 @@ public class MySQLUserDAO implements UserDAO{
 				user.setVisitsNumber(resultSet.getInt(6));
 			}
 
-			return user;
 		} catch (InterruptedException | ConnectionPoolException e) {
-			throw new DAOException("Cannot get a connection from Connection Pool", e);
+			LOGGER.error("Can not get connection from connection pool");
 		} catch (SQLException e){
 			throw new DAOException("DAO layer: cannot find user by id", e);
 		} finally {
@@ -165,9 +185,35 @@ public class MySQLUserDAO implements UserDAO{
 				try {
 					connectionPool.freeConnection(connection);
 				} catch (SQLException | ConnectionPoolException e) {
-					throw new DAOException("Cannot free a connection from Connection Pool", e);
+					LOGGER.error("Can not free connection from connection pool");
 				}
 			}
 		}
+
+		return user;
 	}
+
+
+	public void closeStatement(Statement statement){
+		try {
+			if (statement != null) {
+				statement.close();
+			}
+		} catch (SQLException e){
+			LOGGER.error("Can not close statement");
+		}
+	}
+
+
+	public void closeResultSet(ResultSet resultSet){
+		try {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+		} catch (SQLException e){
+			LOGGER.error("Can not close result set");
+		}
+	}
+
+
 }

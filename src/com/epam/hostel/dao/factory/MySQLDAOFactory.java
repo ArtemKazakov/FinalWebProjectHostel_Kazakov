@@ -1,13 +1,7 @@
 package com.epam.hostel.dao.factory;
 
-import com.epam.hostel.dao.PassportDAO;
-import com.epam.hostel.dao.PoolDAO;
-import com.epam.hostel.dao.RoomDAO;
-import com.epam.hostel.dao.UserDAO;
-import com.epam.hostel.dao.impl.MySQLPassportDAO;
-import com.epam.hostel.dao.impl.MySQLPoolDAO;
-import com.epam.hostel.dao.impl.MySQLRoomDAO;
-import com.epam.hostel.dao.impl.MySQLUserDAO;
+import com.epam.hostel.dao.*;
+import com.epam.hostel.dao.impl.*;
 
 /**
  * Created by ASUS on 29.10.2016.
@@ -19,6 +13,8 @@ public class MySQLDAOFactory extends DAOFactory {
     private final PassportDAO passportDAO = new MySQLPassportDAO();
     private final PoolDAO poolDAO = new MySQLPoolDAO();
     private final RoomDAO roomDAO = new MySQLRoomDAO();
+    private final DiscountDAO discountDAO = new MySQLDiscountDAO();
+    private final RequestDAO requestDAO = new MySQLRequestDAO();
 
     private MySQLDAOFactory(){}
 
@@ -44,5 +40,15 @@ public class MySQLDAOFactory extends DAOFactory {
     @Override
     public RoomDAO getRoomDAO() {
         return roomDAO;
+    }
+
+    @Override
+    public DiscountDAO getDiscountDAO() {
+        return discountDAO;
+    }
+
+    @Override
+    public RequestDAO getRequestDAO() {
+        return requestDAO;
     }
 }

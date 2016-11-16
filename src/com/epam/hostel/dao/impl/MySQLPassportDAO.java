@@ -5,6 +5,7 @@ import com.epam.hostel.dao.PassportDAO;
 import com.epam.hostel.dao.connectionmanager.ConnectionPool;
 import com.epam.hostel.dao.connectionmanager.ConnectionPoolException;
 import com.epam.hostel.dao.exception.DAOException;
+import org.apache.log4j.Logger;
 
 import java.sql.*;
 
@@ -12,6 +13,7 @@ import java.sql.*;
  * Created by ASUS on 27.10.2016.
  */
 public class MySQLPassportDAO implements PassportDAO {
+    Logger LOGGER = Logger.getRootLogger();
 
     private static final String INSERT_USER_PASSPORT_QUERY = "INSERT INTO `passports` " +
             "(`identification_number`, `series`, `surname`, `name`, `lastname`, `birthday`) " +
@@ -82,7 +84,7 @@ public class MySQLPassportDAO implements PassportDAO {
 
             preparedStatement.executeUpdate();
         } catch (InterruptedException | ConnectionPoolException e) {
-            throw new DAOException("Cannot get a connection from Connection Pool", e);
+            LOGGER.error("Can not get connection from connection pool");
         } catch (SQLException e){
             throw new DAOException("DAO layer: cannot update passport", e);
         } finally {
@@ -91,7 +93,7 @@ public class MySQLPassportDAO implements PassportDAO {
                 try {
                     connectionPool.freeConnection(connection);
                 } catch (SQLException | ConnectionPoolException e) {
-                    throw new DAOException("Cannot free a connection from Connection Pool", e);
+                    LOGGER.error("Can not free connection from connection pool");
                 }
             }
         }
@@ -121,10 +123,8 @@ public class MySQLPassportDAO implements PassportDAO {
                 passport.setLastName(resultSet.getString(6));
                 passport.setBirthday(resultSet.getDate(7));
             }
-
-            return passport;
         } catch (InterruptedException | ConnectionPoolException e) {
-            throw new DAOException("Cannot get a connection from Connection Pool", e);
+            LOGGER.error("Can not get connection from connection pool");
         } catch (SQLException e){
             throw new DAOException("DAO layer: cannot find passport by id", e);
         } finally {
@@ -134,9 +134,32 @@ public class MySQLPassportDAO implements PassportDAO {
                 try {
                     connectionPool.freeConnection(connection);
                 } catch (SQLException | ConnectionPoolException e) {
-                    throw new DAOException("Cannot free a connection from Connection Pool", e);
+                    LOGGER.error("Can not free connection from connection pool");
                 }
             }
+        }
+
+        return passport;
+    }
+
+    public void closeStatement(Statement statement){
+        try {
+            if (statement != null) {
+                statement.close();
+            }
+        } catch (SQLException e){
+            LOGGER.error("Can not close statement");
+        }
+    }
+
+
+    public void closeResultSet(ResultSet resultSet){
+        try {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+        } catch (SQLException e){
+            LOGGER.error("Can not close result set");
         }
     }
 }

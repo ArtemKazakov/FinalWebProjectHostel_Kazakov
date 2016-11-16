@@ -5,6 +5,7 @@ import com.epam.hostel.dao.RoomDAO;
 import com.epam.hostel.dao.connectionmanager.ConnectionPool;
 import com.epam.hostel.dao.connectionmanager.ConnectionPoolException;
 import com.epam.hostel.dao.exception.DAOException;
+import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,10 +16,12 @@ import java.util.List;
  */
 public class MySQLRoomDAO implements RoomDAO {
 
-    private static final String GET_ALL_ROOMS_QUERY = "SELECT * FROM `rooms`";
+    Logger LOGGER = Logger.getRootLogger();
+
+    private static final String SELECT_ALL_ROOMS_QUERY = "SELECT * FROM `rooms`";
 
     @Override
-    public List<Room> getAllRooms() throws DAOException {
+    public List<Room> selectAll() throws DAOException {
         ConnectionPool connectionPool = ConnectionPool.getInstance();
         Connection connection = null;
         Statement statement = null;
@@ -28,7 +31,7 @@ public class MySQLRoomDAO implements RoomDAO {
             connection = connectionPool.getConnection();
             statement = connection.createStatement();
 
-            resultSet = statement.executeQuery(GET_ALL_ROOMS_QUERY);
+            resultSet = statement.executeQuery(SELECT_ALL_ROOMS_QUERY);
 
             while(resultSet.next()){
                 Room room = new Room();
@@ -38,9 +41,8 @@ public class MySQLRoomDAO implements RoomDAO {
                 rooms.add(room);
             }
 
-            return rooms;
         } catch (InterruptedException | ConnectionPoolException e) {
-            throw new DAOException("Cannot get a connection from Connection Pool", e);
+            LOGGER.error("Can not get connection from connection pool");
         } catch (SQLException e){
             throw new DAOException("DAO layer: cannot get all rooms", e);
         } finally {
@@ -50,9 +52,32 @@ public class MySQLRoomDAO implements RoomDAO {
                 try {
                     connectionPool.freeConnection(connection);
                 } catch (SQLException | ConnectionPoolException e) {
-                    throw new DAOException("Cannot free a connection from Connection Pool", e);
+                    LOGGER.error("Can not free connection from connection pool");
                 }
             }
+        }
+
+        return rooms;
+    }
+
+    public void closeStatement(Statement statement){
+        try {
+            if (statement != null) {
+                statement.close();
+            }
+        } catch (SQLException e){
+            LOGGER.error("Can not close statement");
+        }
+    }
+
+
+    public void closeResultSet(ResultSet resultSet){
+        try {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+        } catch (SQLException e){
+            LOGGER.error("Can not close result set");
         }
     }
 }

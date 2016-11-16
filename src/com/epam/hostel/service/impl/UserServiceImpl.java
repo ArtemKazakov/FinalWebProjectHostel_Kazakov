@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
             passport.setBirthday(birthday);
 
             passportDAO.update(passport);
-            
+
         } catch (DAOException e){
             throw new ServiceException("Service layer: cannot make a registration", e);
         }
