@@ -14,6 +14,6 @@ public interface SiteService {
     User logIn(String login, String password) throws ServiceException;
 
     void registration(String login, String password, int identificationNumber, String series, String surname,
-                      String name, String lastName, Date birthday) throws ServiceException;
+                      String name, String patronymic, Date birthday) throws ServiceException;
 }
 

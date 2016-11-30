@@ -3,6 +3,8 @@ package com.epam.hostel.dao;
 import com.epam.hostel.bean.entity.User;
 import com.epam.hostel.dao.exception.DAOException;
 
+import java.util.List;
+
 /**
  * Created by ASUS on 19.10.2016.
  */
@@ -14,6 +16,8 @@ public interface UserDAO {
 
     User findByLogin(String login) throws DAOException;
 
-    User findById(int id) throws DAOException;
+    User findByIdAndRole(int id, boolean isAdmin) throws DAOException;
+
+    List<User> findAll() throws DAOException;
 
 }

@@ -47,7 +47,7 @@
                         <input type="hidden" name="command" value="log_out" />
                         <button type="submit" class="btn btn-success">Выйти</button>
                     </form></li>
-                    <li><a href="Controller?command=viewUser&id=${sessionScope.userId}"><span class="glyphicon glyphicon-user"></span> Мой аккаунт</a></li>
+                    <li><a href="Controller?command=userAccount&userId=${sessionScope.userId}"><span class="glyphicon glyphicon-user"></span> Мой аккаунт</a></li>
                 </ul>
             </c:if>
         </div>

@@ -227,7 +227,7 @@ public class MySQLRequestDAO implements RequestDAO {
     }
 
     @Override
-    public List<Request> selectAll() throws DAOException {
+    public List<Request> findAll() throws DAOException {
         ConnectionPool connectionPool = ConnectionPool.getInstance();
         Connection connection = null;
         Statement statement = null;

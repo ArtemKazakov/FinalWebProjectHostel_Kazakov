@@ -10,6 +10,8 @@ import com.epam.hostel.dao.exception.DAOException;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MySQLUserDAO implements UserDAO{
 
@@ -27,7 +29,11 @@ public class MySQLUserDAO implements UserDAO{
 
 	private static final String SELECT_CLIENT_BY_LOGIN_QUERY = "SELECT * FROM `clients` WHERE `login` = ? ";
 
-	private static final String SELECT_USER_BY_ID_QUERY = "SELECT * FROM `clients` WHERE `id_client` = ? ";
+	private static final String SELECT_CLIENT_BY_ID_QUERY = "SELECT * FROM `clients` WHERE `id_client` = ? ";
+
+	private static final String SELECT_ADMINISTRATOR_BY_ID_QUERY = "SELECT * FROM `administrators` WHERE `id_administrator` = ? ";
+
+	private static final String SELECT_ALL_CLIENTS_QUERY = "SELECT * FROM `clients` ";
 
 	@Override
 	public void insert(User user) throws DAOException{
@@ -149,7 +155,7 @@ public class MySQLUserDAO implements UserDAO{
 	}
 
 	@Override
-	public User findById(int id) throws DAOException {
+	public User findByIdAndRole(int id, boolean isAdmin) throws DAOException {
 		ConnectionPool connectionPool = ConnectionPool.getInstance();
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
@@ -157,7 +163,11 @@ public class MySQLUserDAO implements UserDAO{
 		User user = null;
 		try{
 			connection = connectionPool.getConnection();
-			preparedStatement = connection.prepareStatement(SELECT_USER_BY_ID_QUERY);
+			if (isAdmin){
+				preparedStatement = connection.prepareStatement(SELECT_ADMINISTRATOR_BY_ID_QUERY);
+			} else {
+				preparedStatement = connection.prepareStatement(SELECT_CLIENT_BY_ID_QUERY);
+			}
 
 			preparedStatement.setInt(1, id);
 			resultSet = preparedStatement.executeQuery();
@@ -170,8 +180,10 @@ public class MySQLUserDAO implements UserDAO{
 				user.setId(resultSet.getInt(1));
 				user.setLogin(resultSet.getString(2));
 				user.setPassword(resultSet.getString(3));
-				user.setBanned(resultSet.getBoolean(5));
-				user.setVisitsNumber(resultSet.getInt(6));
+				if (!isAdmin) {
+					user.setBanned(resultSet.getBoolean(5));
+					user.setVisitsNumber(resultSet.getInt(6));
+				}
 			}
 
 		} catch (InterruptedException | ConnectionPoolException e) {
@@ -193,6 +205,51 @@ public class MySQLUserDAO implements UserDAO{
 		return user;
 	}
 
+	@Override
+	public List<User> findAll() throws DAOException {
+		ConnectionPool connectionPool = ConnectionPool.getInstance();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet resultSet = null;
+		List<User> users = new ArrayList<>();
+		try{
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+
+			resultSet = statement.executeQuery(SELECT_ALL_CLIENTS_QUERY);
+
+			while(resultSet.next()){
+				User user = new User();
+				Passport passport = new Passport();
+				passport.setId(resultSet.getInt(4));
+				user.setPassport(passport);
+				user.setId(resultSet.getInt(1));
+				user.setLogin(resultSet.getString(2));
+				user.setPassword(resultSet.getString(3));
+				user.setBanned(resultSet.getBoolean(5));
+				user.setVisitsNumber(resultSet.getInt(6));
+
+				users.add(user);
+			}
+
+		} catch (InterruptedException | ConnectionPoolException e) {
+			LOGGER.error("Can not get connection from connection pool");
+		} catch (SQLException e){
+			throw new DAOException("DAO layer: cannot select all users", e);
+		} finally {
+			closeResultSet(resultSet);
+			closeStatement(statement);
+			if (connection != null) {
+				try {
+					connectionPool.freeConnection(connection);
+				} catch (SQLException | ConnectionPoolException e) {
+					LOGGER.error("Can not free connection from connection pool");
+				}
+			}
+		}
+
+		return users;
+	}
 
 	public void closeStatement(Statement statement){
 		try {

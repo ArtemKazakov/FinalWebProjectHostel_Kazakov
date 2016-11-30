@@ -10,7 +10,7 @@ public class ScheduleRecord {
     private int id;
     private int roomId;
     private int requestId;
-    private Date chekinDate;
+    private Date checkinDate;
     private Date checkoutDate;
     private int paymentDuty;
 
@@ -38,12 +38,12 @@ public class ScheduleRecord {
         this.requestId = requestId;
     }
 
-    public Date getChekinDate() {
-        return chekinDate;
+    public Date getCheckinDate() {
+        return checkinDate;
     }
 
-    public void setChekinDate(Date chekinDate) {
-        this.chekinDate = chekinDate;
+    public void setCheckinDate(Date checkinDate) {
+        this.checkinDate = checkinDate;
     }
 
     public Date getCheckoutDate() {
@@ -73,7 +73,7 @@ public class ScheduleRecord {
         if (roomId != that.roomId) return false;
         if (requestId != that.requestId) return false;
         if (paymentDuty != that.paymentDuty) return false;
-        if (chekinDate != null ? !chekinDate.equals(that.chekinDate) : that.chekinDate != null) return false;
+        if (checkinDate != null ? !checkinDate.equals(that.checkinDate) : that.checkinDate != null) return false;
         if (checkoutDate != null ? !checkoutDate.equals(that.checkoutDate) : that.checkoutDate != null) return false;
 
         return true;
@@ -84,7 +84,7 @@ public class ScheduleRecord {
         int result = id;
         result = 31 * result + roomId;
         result = 31 * result + requestId;
-        result = 31 * result + (chekinDate != null ? chekinDate.hashCode() : 0);
+        result = 31 * result + (checkinDate != null ? checkinDate.hashCode() : 0);
         result = 31 * result + (checkoutDate != null ? checkoutDate.hashCode() : 0);
         result = 31 * result + paymentDuty;
         return result;
@@ -96,7 +96,7 @@ public class ScheduleRecord {
                 "id=" + id +
                 ", roomId=" + roomId +
                 ", requestId=" + requestId +
-                ", chekinDate=" + chekinDate +
+                ", checkinDate=" + checkinDate +
                 ", checkoutDate=" + checkoutDate +
                 ", paymentDuty=" + paymentDuty +
                 '}';

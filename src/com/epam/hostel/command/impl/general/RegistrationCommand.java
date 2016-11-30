@@ -2,6 +2,8 @@ package com.epam.hostel.command.impl.general;
 
 import com.epam.hostel.bean.entity.User;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.LanguageUtil;
+import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.SiteService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.exception.ServiceWrongLoginException;
@@ -22,6 +24,7 @@ import java.util.Date;
 public class RegistrationCommand implements Command {
 
     private static final String JSP_PAGE_PATH = "WEB-INF/jsp/registration.jsp";
+    private static final String REDIRECT_PAGE = "Controller?command=registration&";
 
     private static final String REGISTRATION_FORM_LOGIN_PARAM = "registrationFormLogin";
     private static final String REGISTRATION_FORM_PASSWORD_PARAM = "registrationFormPassword";
@@ -29,15 +32,19 @@ public class RegistrationCommand implements Command {
     private static final String REGISTRATION_FORM_SERIES_PARAM = "registrationFormSeries";
     private static final String REGISTRATION_FORM_SURNAME_PARAM = "registrationFormSurname";
     private static final String REGISTRATION_FORM_NAME_PARAM = "registrationFormName";
-    private static final String REGISTRATION_FORM_LAST_NAME_PARAM = "registrationFormLastName";
+    private static final String REGISTRATION_FORM_PATRONYMIC_PARAM = "registrationFormPatronymic";
     private static final String REGISTRATION_FORM_BIRTHDAY_DATE_PARAM = "registrationFormBirthdayDate";
 
     private static final String REGISTRATION_SUCCESS_REQUEST_ATTR = "registrationSuccess";
     private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
     private static final String WRONG_LOGIN_REQUEST_ATTR = "wrongLogin";
     private static final String WRONG_PASSWORD_REQUEST_ATTR = "wrongPassword";
+    private static final String SELECTED_LANGUAGE_REQUEST_ATTR = "selectedLanguage";
 
     private static final String BIRTHDAY_DATE_FORMAT = "yyyy-MM-dd";
+
+    private static final String AMP = "&";
+    private static final String EQ = "=";
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -55,7 +62,7 @@ public class RegistrationCommand implements Command {
         String registrationFormSeries = request.getParameter(REGISTRATION_FORM_SERIES_PARAM);
         String registrationFormSurname = request.getParameter(REGISTRATION_FORM_SURNAME_PARAM);
         String registrationFormName = request.getParameter(REGISTRATION_FORM_NAME_PARAM);
-        String registrationFormLastName = request.getParameter(REGISTRATION_FORM_LAST_NAME_PARAM);
+        String registrationFormPatronymic = request.getParameter(REGISTRATION_FORM_PATRONYMIC_PARAM);
         String registrationFormBirthdayDateString = request.getParameter(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM);
         SimpleDateFormat format = new SimpleDateFormat(BIRTHDAY_DATE_FORMAT);
         Date registrationFormBirthdayDate = null;
@@ -69,44 +76,74 @@ public class RegistrationCommand implements Command {
 
         if (registrationFormLogin != null && registrationFormPassword != null &&
                 registrationFormSeries != null && registrationFormSurname != null && registrationFormName != null &&
-                registrationFormLastName != null) {
+                registrationFormPatronymic != null) {
             try {
                 ServiceFactory serviceFactory = ServiceFactory.getInstance();
                 SiteService siteService = serviceFactory.getSiteService();
                 siteService.registration(registrationFormLogin, registrationFormPassword, registrationFormIdentificationNumber,
-                        registrationFormSeries, registrationFormSurname, registrationFormName, registrationFormLastName,
+                        registrationFormSeries, registrationFormSurname, registrationFormName, registrationFormPatronymic,
                         registrationFormBirthdayDate);
-                request.setAttribute(REGISTRATION_SUCCESS_REQUEST_ATTR, true);
+                response.sendRedirect(REDIRECT_PAGE+REGISTRATION_SUCCESS_REQUEST_ATTR+EQ+true);
             } catch (ServiceWrongLoginException e){
-                request.setAttribute(REGISTRATION_FORM_LOGIN_PARAM, registrationFormLogin);
-                request.setAttribute(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM, registrationFormIdentificationNumber);
-                request.setAttribute(REGISTRATION_FORM_SERIES_PARAM, registrationFormSeries);
-                request.setAttribute(REGISTRATION_FORM_SURNAME_PARAM, registrationFormSurname);
-                request.setAttribute(REGISTRATION_FORM_LAST_NAME_PARAM, registrationFormLastName);
-                request.setAttribute(REGISTRATION_FORM_NAME_PARAM, registrationFormName);
-                request.setAttribute(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM, registrationFormBirthdayDateString);
-                request.setAttribute(WRONG_LOGIN_REQUEST_ATTR, true);
+                response.sendRedirect(makeErrorRedirectString(WRONG_LOGIN_REQUEST_ATTR, registrationFormLogin,
+                        registrationFormIdentificationNumber, registrationFormSeries, registrationFormSurname,
+                        registrationFormPatronymic, registrationFormName, registrationFormBirthdayDate));
             } catch (ServiceWrongPasswordException e){
-                request.setAttribute(REGISTRATION_FORM_LOGIN_PARAM, registrationFormLogin);
-                request.setAttribute(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM, registrationFormIdentificationNumber);
-                request.setAttribute(REGISTRATION_FORM_SERIES_PARAM, registrationFormSeries);
-                request.setAttribute(REGISTRATION_FORM_SURNAME_PARAM, registrationFormSurname);
-                request.setAttribute(REGISTRATION_FORM_LAST_NAME_PARAM, registrationFormLastName);
-                request.setAttribute(REGISTRATION_FORM_NAME_PARAM, registrationFormName);
-                request.setAttribute(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM, registrationFormBirthdayDateString);
-                request.setAttribute(WRONG_PASSWORD_REQUEST_ATTR, true);
+                response.sendRedirect(makeErrorRedirectString(WRONG_PASSWORD_REQUEST_ATTR, registrationFormLogin,
+                        registrationFormIdentificationNumber, registrationFormSeries, registrationFormSurname,
+                        registrationFormPatronymic, registrationFormName, registrationFormBirthdayDate));
             } catch (ServiceException e){
-                request.setAttribute(REGISTRATION_FORM_LOGIN_PARAM, registrationFormLogin);
-                request.setAttribute(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM, registrationFormIdentificationNumber);
-                request.setAttribute(REGISTRATION_FORM_SERIES_PARAM, registrationFormSeries);
-                request.setAttribute(REGISTRATION_FORM_SURNAME_PARAM, registrationFormSurname);
-                request.setAttribute(REGISTRATION_FORM_LAST_NAME_PARAM, registrationFormLastName);
-                request.setAttribute(REGISTRATION_FORM_NAME_PARAM, registrationFormName);
-                request.setAttribute(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM, registrationFormBirthdayDateString);
-                request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);
+                response.sendRedirect(makeErrorRedirectString(SERVICE_ERROR_REQUEST_ATTR, registrationFormLogin,
+                        registrationFormIdentificationNumber, registrationFormSeries, registrationFormSurname,
+                        registrationFormPatronymic, registrationFormName, registrationFormBirthdayDate));
             }
         }
 
-        request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
+        else {
+            QueryUtil.saveCurrentQueryToSession(request);
+            String languageId = LanguageUtil.getLanguageId(request);
+            request.setAttribute(SELECTED_LANGUAGE_REQUEST_ATTR, languageId);
+
+            request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
+        }
+    }
+
+    private String makeErrorRedirectString(String errorName, String login, int identificationNumber,
+                                           String series, String surname, String name, String patronymic, Date birthday){
+        StringBuilder parameters = new StringBuilder();
+        parameters.append(REDIRECT_PAGE);
+        parameters.append(errorName);
+        parameters.append(EQ);
+        parameters.append(true);
+        parameters.append(AMP);
+        parameters.append(REGISTRATION_FORM_LOGIN_PARAM);
+        parameters.append(EQ);
+        parameters.append(login);
+        parameters.append(AMP);
+        parameters.append(REGISTRATION_FORM_IDENTIFICATION_NUMBER_PARAM);
+        parameters.append(EQ);
+        parameters.append(identificationNumber);
+        parameters.append(AMP);
+        parameters.append(REGISTRATION_FORM_SERIES_PARAM);
+        parameters.append(EQ);
+        parameters.append(series);
+        parameters.append(AMP);
+        parameters.append(REGISTRATION_FORM_SURNAME_PARAM);
+        parameters.append(EQ);
+        parameters.append(surname);
+        parameters.append(AMP);
+        parameters.append(REGISTRATION_FORM_PATRONYMIC_PARAM);
+        parameters.append(EQ);
+        parameters.append(patronymic);
+        parameters.append(AMP);
+        parameters.append(REGISTRATION_FORM_NAME_PARAM);
+        parameters.append(EQ);
+        parameters.append(name);
+        parameters.append(AMP);
+        parameters.append(REGISTRATION_FORM_BIRTHDAY_DATE_PARAM);
+        parameters.append(EQ);
+        parameters.append(birthday);
+
+        return parameters.toString();
     }
 }

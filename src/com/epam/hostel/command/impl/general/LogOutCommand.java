@@ -13,13 +13,17 @@ import java.io.IOException;
  */
 public class LogOutCommand implements Command {
 
-    private static final String JSP_PAGE_PATH = "index.jsp";
+    private static final String JSP_PAGE_PATH = "/Controller?command=mainPage";
+
+    private static final String USER_ID_SESSION_ATTRIBUTE = "userId";
+    private static final String USER_ROLE_SESSION_ATTRIBUTE = "userRole";
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if(session != null){
-            session.invalidate();
+            session.removeAttribute(USER_ID_SESSION_ATTRIBUTE);
+            session.removeAttribute(USER_ROLE_SESSION_ATTRIBUTE);
         }
         response.sendRedirect(JSP_PAGE_PATH);
     }

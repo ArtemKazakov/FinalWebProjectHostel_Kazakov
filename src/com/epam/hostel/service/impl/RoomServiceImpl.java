@@ -20,10 +20,28 @@ public class RoomServiceImpl implements RoomService{
         List<Room> rooms = null;
 
         try{
-            rooms = dao.selectAll();
+            rooms = dao.findAll();
             return rooms;
         } catch (DAOException e) {
             throw new ServiceException("Service layer: cannot get all rooms", e);
+        }
+    }
+
+    @Override
+    public List<Room> getAllRoomsBySeatsNumber(int seatsNumber) throws ServiceException {
+        if(!Validator.validateInt(seatsNumber)){
+            throw new ServiceException("Wrong seats number for getting rooms");
+        }
+
+        DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
+        RoomDAO dao = factory.getRoomDAO();
+        List<Room> rooms = null;
+
+        try{
+            rooms = dao.findBySeatsNumber(seatsNumber);
+            return rooms;
+        } catch (DAOException e) {
+            throw new ServiceException("Service layer: cannot get rooms by seats number", e);
         }
     }
 }

@@ -22,7 +22,7 @@ public class SiteServiceImpl implements SiteService {
     private static final int SERIES_MAX_LENGTH = 2;
     private static final int SURNAME_MAX_LENGTH = 40;
     private static final int NAME_MAX_LENGTH = 40;
-    private static final int LASTNAME_MAX_LENGTH = 40;
+    private static final int PATRONYMIC_MAX_LENGTH = 40;
 
 
     @Override
@@ -54,7 +54,7 @@ public class SiteServiceImpl implements SiteService {
 
     @Override
     public void registration(String login, String password, int identificationNumber, String series, String surname,
-                             String name, String lastName, Date birthday) throws ServiceException{
+                             String name, String patronymic, Date birthday) throws ServiceException{
         if(!Validator.validateLogin(login)){
             throw new ServiceWrongLoginException("Wrong login");
         }
@@ -64,7 +64,7 @@ public class SiteServiceImpl implements SiteService {
         if(!Validator.validateInt(identificationNumber) ||
                 !Validator.validateString(series, SERIES_MAX_LENGTH) || !Validator.validateString(surname, SURNAME_MAX_LENGTH) ||
                 !Validator.validateString(name, NAME_MAX_LENGTH)
-                || !Validator.validateString(lastName, LASTNAME_MAX_LENGTH) ||  birthday == null){
+                || !Validator.validateString(patronymic, PATRONYMIC_MAX_LENGTH) ||  birthday == null){
             throw new ServiceException("Wrong parameters for registration");
         }
 
@@ -83,7 +83,7 @@ public class SiteServiceImpl implements SiteService {
             passport.setSeries(series);
             passport.setSurname(surname);
             passport.setName(name);
-            passport.setLastName(lastName);
+            passport.setPatronymic(patronymic);
             passport.setBirthday(birthday);
 
             int passportId = passportDAO.insert(passport);

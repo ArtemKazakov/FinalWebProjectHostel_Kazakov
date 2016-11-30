@@ -20,5 +20,5 @@ public interface RequestDAO {
 
     List<Request> findByAdministratorId(int id) throws DAOException;
 
-    List<Request> selectAll() throws DAOException;
+    List<Request> findAll() throws DAOException;
 }

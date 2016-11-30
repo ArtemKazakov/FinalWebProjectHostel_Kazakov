@@ -212,7 +212,7 @@ public class MySQLDiscountDAO implements DiscountDAO {
     }
 
     @Override
-    public List<Discount> selectAll() throws DAOException {
+    public List<Discount> findAll() throws DAOException {
         ConnectionPool connectionPool = ConnectionPool.getInstance();
         Connection connection = null;
         Statement statement = null;

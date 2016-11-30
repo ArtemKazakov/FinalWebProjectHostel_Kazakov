@@ -15,6 +15,7 @@ public class MySQLDAOFactory extends DAOFactory {
     private final RoomDAO roomDAO = new MySQLRoomDAO();
     private final DiscountDAO discountDAO = new MySQLDiscountDAO();
     private final RequestDAO requestDAO = new MySQLRequestDAO();
+    private final ScheduleRecordDAO scheduleRecordDAO = new MySQLScheduleRecordDAO();
 
     private MySQLDAOFactory(){}
 
@@ -50,5 +51,10 @@ public class MySQLDAOFactory extends DAOFactory {
     @Override
     public RequestDAO getRequestDAO() {
         return requestDAO;
+    }
+
+    @Override
+    public ScheduleRecordDAO getScheduleRecordDAO() {
+        return scheduleRecordDAO;
     }
 }

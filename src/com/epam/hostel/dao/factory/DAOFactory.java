@@ -24,6 +24,8 @@ public abstract class DAOFactory {
 
 	public abstract RequestDAO getRequestDAO();
 
+	public abstract ScheduleRecordDAO getScheduleRecordDAO();
+
 	public enum Factories {
 		MYSQL
 	}

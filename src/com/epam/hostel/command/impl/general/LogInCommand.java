@@ -2,6 +2,8 @@ package com.epam.hostel.command.impl.general;
 
 import com.epam.hostel.bean.entity.User;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.LanguageUtil;
+import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.SiteService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.exception.ServiceWrongLoginException;
@@ -20,7 +22,7 @@ import java.io.IOException;
  */
 public class LogInCommand implements Command {
 
-    private static final String JSP_PAGE_PATH = "index.jsp";
+    private static final String REDIRECT_PAGE = "/Controller?command=mainPage";
 
     private static final String USER_ID_SESSION_ATTRIBUTE = "userId";
     private static final String USER_ROLE_SESSION_ATTRIBUTE = "userRole";
@@ -31,6 +33,10 @@ public class LogInCommand implements Command {
     private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
     private static final String WRONG_LOGIN_REQUEST_ATTR = "wrongLogin";
     private static final String WRONG_PASSWORD_REQUEST_ATTR = "wrongPassword";
+    private static final String SELECTED_LANGUAGE_REQUEST_ATTR = "selectedLanguage";
+
+    private static final String AMP = "&";
+    private static final String EQ = "=";
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
@@ -45,17 +51,21 @@ public class LogInCommand implements Command {
                 HttpSession session = request.getSession(true);
                 session.setAttribute(USER_ID_SESSION_ATTRIBUTE, user.getId());
                 session.setAttribute(USER_ROLE_SESSION_ATTRIBUTE, user.isAdmin());
-                response.sendRedirect(JSP_PAGE_PATH);
+                response.sendRedirect(REDIRECT_PAGE);
             } catch (ServiceWrongLoginException e){
-                request.setAttribute(WRONG_LOGIN_REQUEST_ATTR, true);
-                request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
+                response.sendRedirect(REDIRECT_PAGE+AMP+WRONG_LOGIN_REQUEST_ATTR+EQ+true);
             } catch (ServiceWrongPasswordException e){
-                request.setAttribute(WRONG_PASSWORD_REQUEST_ATTR, true);
-                request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
+                response.sendRedirect(REDIRECT_PAGE+AMP+WRONG_PASSWORD_REQUEST_ATTR+EQ+true);
             } catch (ServiceException e){
-                request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);
-                request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);
+                response.sendRedirect(REDIRECT_PAGE+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
             }
+        }
+        else{
+            QueryUtil.saveCurrentQueryToSession(request);
+            String languageId = LanguageUtil.getLanguageId(request);
+            request.setAttribute(SELECTED_LANGUAGE_REQUEST_ATTR, languageId);
+
+            request.getRequestDispatcher(REDIRECT_PAGE).forward(request, response);
         }
 
 

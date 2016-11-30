@@ -2,6 +2,7 @@ package com.epam.hostel.command.impl.room;
 
 import com.epam.hostel.bean.entity.Room;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.RoomService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.factory.ServiceFactory;
@@ -25,6 +26,8 @@ public class ViewRoomsListCommand implements Command{
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        QueryUtil.saveCurrentQueryToSession(request);
+
         try {
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
             RoomService roomService = serviceFactory.getRoomService();

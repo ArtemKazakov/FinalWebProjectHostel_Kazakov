@@ -10,6 +10,9 @@ import java.util.List;
  */
 public interface RoomDAO {
 
-    List<Room> selectAll() throws DAOException;
+    List<Room> findAll() throws DAOException;
+
+    List<Room> findBySeatsNumber(int seatsNumber) throws DAOException;
+
 
 }

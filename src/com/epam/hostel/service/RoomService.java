@@ -11,4 +11,7 @@ import java.util.List;
 public interface RoomService {
 
     List<Room> getAllRooms() throws ServiceException;
+
+    List<Room> getAllRoomsBySeatsNumber(int seatsNumber) throws ServiceException;
+
 }

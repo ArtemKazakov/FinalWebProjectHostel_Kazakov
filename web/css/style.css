@@ -6,3 +6,76 @@ body {
 #user-edit{
     display: none;
 }
+
+.ta_center {
+    text-align: center;
+}
+
+.st1 {
+    font-size: 17px;
+    line-height: 30px;
+}
+/****Blocks****/
+
+.banner {
+    margin-bottom: 1px;
+    position: relative;
+    color: #fff;
+    font: 3.5em Roboto, 'Roboto Regular', arial;
+    padding-left: 1px;
+    width: 100%;
+}
+@media screen and (max-width: 500px) {
+    .banner {
+    font-size:2.5em;
+    }
+}
+
+
+.bann_capt {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 30%;
+    margin-top: -34px;
+}
+
+.banner:hover span {
+    color: #fff;
+    width: 100%;
+}
+
+
+.bann_capt span {
+    transition: 0.5s ease;
+    -o-transition: 0.5s ease;
+    -webkit-transition: 0.5s ease;
+    padding-bottom: 14px;
+    display: inline-block;
+    border-bottom: 1px solid #fff;
+    width: 80%;
+    text-shadow: black 0 0 10px;
+}
+
+.banner img {
+    width: 100%;
+    height: 320px;
+    filter: blur(2px);
+}
+
+.img_inner {
+    width: 135px;
+    height: 135px;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-top: 0px;
+    float: left;
+    margin-right: 30px;
+    margin-bottom: 10px;
+}
+
+.extra_wrapper{
+    min-height: 140px;
+}

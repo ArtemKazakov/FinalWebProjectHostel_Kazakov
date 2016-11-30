@@ -16,11 +16,11 @@ public class MySQLPassportDAO implements PassportDAO {
     Logger LOGGER = Logger.getRootLogger();
 
     private static final String INSERT_USER_PASSPORT_QUERY = "INSERT INTO `passports` " +
-            "(`identification_number`, `series`, `surname`, `name`, `lastname`, `birthday`) " +
+            "(`identification_number`, `series`, `surname`, `name`, `patronymic`, `birthday`) " +
             "VALUES (?, ?, ?, ?, ?, ?) ";
 
     private static final String UPDATE_USER_PASSPORT_QUERY = "UPDATE `passports` " +
-            "SET `identification_number` = ?, `series` = ?, `surname` = ?, `name` = ?, `lastname` = ?, `birthday` = ? " +
+            "SET `identification_number` = ?, `series` = ?, `surname` = ?, `name` = ?, `patronymic` = ?, `birthday` = ? " +
             "WHERE `id_passport` = ? ";
 
     private static final String SELECT_PASSPORT_BY_ID_QUERY = "SELECT * FROM `passports` WHERE `id_passport` = ? ";
@@ -40,7 +40,7 @@ public class MySQLPassportDAO implements PassportDAO {
             preparedStatement.setString(2, passport.getSeries());
             preparedStatement.setString(3, passport.getSurname());
             preparedStatement.setString(4, passport.getName());
-            preparedStatement.setString(5, passport.getLastName());
+            preparedStatement.setString(5, passport.getPatronymic());
             preparedStatement.setDate(6, new java.sql.Date(passport.getBirthday().getTime()));
 
             preparedStatement.executeUpdate();
@@ -78,7 +78,7 @@ public class MySQLPassportDAO implements PassportDAO {
             preparedStatement.setString(2, passport.getSeries());
             preparedStatement.setString(3, passport.getSurname());
             preparedStatement.setString(4, passport.getName());
-            preparedStatement.setString(5, passport.getLastName());
+            preparedStatement.setString(5, passport.getPatronymic());
             preparedStatement.setDate(6, new java.sql.Date(passport.getBirthday().getTime()));
             preparedStatement.setInt(7, passport.getId());
 
@@ -120,7 +120,7 @@ public class MySQLPassportDAO implements PassportDAO {
                 passport.setSeries(resultSet.getString(3));
                 passport.setSurname(resultSet.getString(4));
                 passport.setName(resultSet.getString(5));
-                passport.setLastName(resultSet.getString(6));
+                passport.setPatronymic(resultSet.getString(6));
                 passport.setBirthday(resultSet.getDate(7));
             }
         } catch (InterruptedException | ConnectionPoolException e) {

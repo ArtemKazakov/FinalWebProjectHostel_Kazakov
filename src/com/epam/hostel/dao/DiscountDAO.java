@@ -20,6 +20,6 @@ public interface DiscountDAO {
 
     List<Discount> findByAdministratorId(int id) throws DAOException;
 
-    List<Discount> selectAll() throws DAOException;
+    List<Discount> findAll() throws DAOException;
 
 }

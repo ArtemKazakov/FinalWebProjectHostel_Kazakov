@@ -12,7 +12,7 @@ public class Passport {
     private String series;
     private String surname;
     private String name;
-    private String lastName;
+    private String patronymic;
     private Date birthday;
 
     public int getId() {
@@ -55,12 +55,12 @@ public class Passport {
         this.name = name;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getPatronymic() {
+        return patronymic;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setPatronymic(String patronymic) {
+        this.patronymic = patronymic;
     }
 
     public Date getBirthday() {
@@ -83,7 +83,7 @@ public class Passport {
         if (series != null ? !series.equals(passport.series) : passport.series != null) return false;
         if (surname != null ? !surname.equals(passport.surname) : passport.surname != null) return false;
         if (name != null ? !name.equals(passport.name) : passport.name != null) return false;
-        if (lastName != null ? !lastName.equals(passport.lastName) : passport.lastName != null) return false;
+        if (patronymic != null ? !patronymic.equals(passport.patronymic) : passport.patronymic != null) return false;
         if (birthday != null ? !birthday.equals(passport.birthday) : passport.birthday != null) return false;
 
         return true;
@@ -96,7 +96,7 @@ public class Passport {
         result = 31 * result + (series != null ? series.hashCode() : 0);
         result = 31 * result + (surname != null ? surname.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
+        result = 31 * result + (patronymic != null ? patronymic.hashCode() : 0);
         result = 31 * result + (birthday != null ? birthday.hashCode() : 0);
         return result;
     }
@@ -109,7 +109,7 @@ public class Passport {
                 ", series='" + series + '\'' +
                 ", surname='" + surname + '\'' +
                 ", name='" + name + '\'' +
-                ", lastName='" + lastName + '\'' +
+                ", patronymic='" + patronymic + '\'' +
                 ", birthday=" + birthday +
                 '}';
     }
