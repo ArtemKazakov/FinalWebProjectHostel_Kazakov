@@ -4,21 +4,25 @@ import javax.servlet.*;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 01.11.2016.
+ * Sets character encoding for every request.
  */
 public class CharsetFilter implements Filter {
 
-    private static final String ENCODING = "UTF-8";
+    private String defaultEncoding = "utf-8";
+    private static final String ENCODING = "encoding";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
+        String encoding = filterConfig.getInitParameter(ENCODING);
+        if(encoding != null){
+            defaultEncoding = encoding;
+        }
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        servletRequest.setCharacterEncoding(ENCODING);
-        servletResponse.setCharacterEncoding(ENCODING);
+        servletRequest.setCharacterEncoding(defaultEncoding);
+        servletResponse.setCharacterEncoding(defaultEncoding);
 
         filterChain.doFilter(servletRequest, servletResponse);
     }

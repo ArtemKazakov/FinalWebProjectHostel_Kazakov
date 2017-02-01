@@ -9,7 +9,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 02.11.2016.
+ * Services the request to log out from the system.
  */
 public class LogOutCommand implements Command {
 

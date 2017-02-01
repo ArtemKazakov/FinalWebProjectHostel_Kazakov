@@ -1,21 +1,23 @@
 package com.epam.hostel.dao.impl;
 
-
 import com.epam.hostel.bean.entity.Passport;
 import com.epam.hostel.bean.entity.User;
 import com.epam.hostel.dao.UserDAO;
-import com.epam.hostel.dao.connectionmanager.ConnectionPool;
-import com.epam.hostel.dao.connectionmanager.ConnectionPoolException;
 import com.epam.hostel.dao.exception.DAOException;
+import com.epam.hostel.dao.transaction.impl.TransactionManagerImpl;
 import org.apache.log4j.Logger;
 
+import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
+import org.apache.xerces.impl.dv.util.Base64;
 import java.util.List;
 
-public class MySQLUserDAO implements UserDAO{
+/**
+ * Provides a DAO-logic for the {@link User} entity for the MySQL Database.
+ */
+public class MySQLUserDAO extends MySQLDAO implements UserDAO {
 
-	private static final Logger LOGGER = Logger.getRootLogger();
+	private static final Logger logger = Logger.getLogger(MySQLUserDAO.class);
 
 	private static final String INSERT_USER_QUERY = "INSERT INTO `clients` " +
 			"(`login`, `password`, `id_passport`) " +
@@ -41,134 +43,101 @@ public class MySQLUserDAO implements UserDAO{
 
 	private static final String SELECT_ALL_CLIENTS_QUERY = "SELECT * FROM `clients` ";
 
+	private DataSource dataSource = (DataSource) TransactionManagerImpl.getInstance();
+
+	/**
+	 * Set a {@link DataSource} object, that will give a {@link Connection}
+	 * for all operation with the database.
+	 * @param dataSource for setting
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Inserts a new user into a database.
+	 *
+	 * @param user a user object for insertion
+	 * @throws DAOException in case of some exception with
+	 *                      a database or a connection with it
+	 */
 	@Override
 	public void insert(User user) throws DAOException{
-		ConnectionPool connectionPool = ConnectionPool.getInstance();
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try{
-			connection = connectionPool.getConnection();
-			preparedStatement = connection.prepareStatement(INSERT_USER_QUERY);
-
-			preparedStatement.setString(1, user.getLogin());
-			preparedStatement.setString(2, user.getPassword());
-			preparedStatement.setInt(3, user.getPassport().getId());
-
-			preparedStatement.executeUpdate();
-		} catch (InterruptedException | ConnectionPoolException e) {
-			LOGGER.error("Can not get connection from connection pool");
-		} catch (SQLException e){
-			throw new DAOException("DAO layer: cannot insert user", e);
-		} finally {
-			closeStatement(preparedStatement);
-			if (connection != null) {
-				try {
-					connectionPool.freeConnection(connection);
-				} catch (SQLException | ConnectionPoolException e) {
-					LOGGER.error("Can not free connection from connection pool");
+		doDataManipulation(dataSource, INSERT_USER_QUERY, "DAO layer: cannot insert user",
+				preparedStatement -> {
+					preparedStatement.setString(1, user.getLogin());
+					preparedStatement.setString(2, Base64.encode(user.getPassword()));
+					preparedStatement.setInt(3, user.getPassport().getId());
 				}
-			}
-		}
+		);
 	}
 
+	/**
+	 * Updates a user in a database.
+	 *
+	 * @param user a user object for update
+	 * @throws DAOException in case of some exception with
+	 *                      a database or a connection with it
+	 */
 	@Override
 	public void update(User user) throws DAOException {
-		ConnectionPool connectionPool = ConnectionPool.getInstance();
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try{
-			connection = connectionPool.getConnection();
-			preparedStatement = connection.prepareStatement(UPDATE_USER_QUERY);
-
-			preparedStatement.setString(1, user.getLogin());
-			preparedStatement.setString(2, user.getPassword());
-			preparedStatement.setInt(3, user.getId());
-
-			preparedStatement.executeUpdate();
-		} catch (InterruptedException | ConnectionPoolException e) {
-			LOGGER.error("Can not get connection from connection pool");
-		} catch (SQLException e){
-			throw new DAOException("DAO layer: cannot update user", e);
-		} finally {
-			closeStatement(preparedStatement);
-			if (connection != null) {
-				try {
-					connectionPool.freeConnection(connection);
-				} catch (SQLException | ConnectionPoolException e) {
-					LOGGER.error("Can not free connection from connection pool");
+		doDataManipulation(dataSource, UPDATE_USER_QUERY, "DAO layer: cannot update user",
+				preparedStatement -> {
+					preparedStatement.setString(1, user.getLogin());
+					preparedStatement.setString(2, Base64.encode(user.getPassword()));
+					preparedStatement.setInt(3, user.getId());
 				}
-			}
-		}
+		);
 	}
 
+	/**
+	 * Updates a user ban status in a database.
+	 *
+	 * @param user a user object that contains ban status for update
+	 * @throws DAOException in case of some exception with
+	 *                      a database or a connection with it
+	 */
 	@Override
 	public void updateBanned(User user) throws DAOException {
-		ConnectionPool connectionPool = ConnectionPool.getInstance();
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try{
-			connection = connectionPool.getConnection();
-			preparedStatement = connection.prepareStatement(UPDATE_BANNED_USER_QUERY);
-
-			preparedStatement.setBoolean(1, user.isBanned());
-			preparedStatement.setInt(2, user.getId());
-
-			preparedStatement.executeUpdate();
-		} catch (InterruptedException | ConnectionPoolException e) {
-			LOGGER.error("Can not get connection from connection pool");
-		} catch (SQLException e){
-			throw new DAOException("DAO layer: cannot update banned user", e);
-		} finally {
-			closeStatement(preparedStatement);
-			if (connection != null) {
-				try {
-					connectionPool.freeConnection(connection);
-				} catch (SQLException | ConnectionPoolException e) {
-					LOGGER.error("Can not free connection from connection pool");
+		doDataManipulation(dataSource, UPDATE_BANNED_USER_QUERY, "DAO layer: cannot update banned user",
+				preparedStatement -> {
+					preparedStatement.setBoolean(1, user.isBanned());
+					preparedStatement.setInt(2, user.getId());
 				}
-			}
-		}
+		);
 	}
 
+	/**
+	 * Deletes a user from a database by id.
+	 *
+	 * @param id an id of deleting user
+	 * @throws DAOException in case of some exception with
+	 *                      a database or a connection with it
+	 */
 	@Override
 	public void delete(int id) throws DAOException {
-		ConnectionPool connectionPool = ConnectionPool.getInstance();
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try{
-			connection = connectionPool.getConnection();
-			preparedStatement = connection.prepareStatement(DELETE_USER_BY_ID_QUERY);
-
-			preparedStatement.setInt(1, id);
-			preparedStatement.executeUpdate();
-
-		} catch (InterruptedException | ConnectionPoolException e) {
-			LOGGER.error("Can not get connection from connection pool");
-		} catch (SQLException e){
-			throw new DAOException("DAO layer: cannot delete user", e);
-		} finally {
-			closeStatement(preparedStatement);
-			if (connection != null) {
-				try {
-					connectionPool.freeConnection(connection);
-				} catch (SQLException | ConnectionPoolException e) {
-					LOGGER.error("Can not free connection from connection pool");
-				}
-			}
-		}
+		doDataManipulation(dataSource, DELETE_USER_BY_ID_QUERY, "DAO layer: cannot delete user",
+				preparedStatement -> preparedStatement.setInt(1, id)
+		);
 	}
 
+	/**
+	 * Gives a user from a database by login.
+	 *
+	 * @param login a login of a desired user
+	 * @return a user object containing the necessary data
+	 * @throws DAOException in case of some exception with
+	 *                      a database or a connection with it
+	 */
 	@Override
 	public User findByLogin(String login) throws DAOException {
-		ConnectionPool connectionPool = ConnectionPool.getInstance();
-		Connection connection = null;
 		PreparedStatement preparedStatementAdministrator = null;
 		ResultSet resultSetAdministrator = null;
 		PreparedStatement preparedStatementClient = null;
 		ResultSet resultSetClient = null;
 		User user = null;
 		try{
-			connection = connectionPool.getConnection();
+			Connection connection = dataSource.getConnection();
 			preparedStatementAdministrator = connection.prepareStatement(SELECT_ADMINISTRATOR_BY_LOGIN_QUERY);
 
 			preparedStatementAdministrator.setString(1, login);
@@ -184,7 +153,8 @@ public class MySQLUserDAO implements UserDAO{
 					user = new User();
 					user.setId(resultSetClient.getInt(1));
 					user.setLogin(resultSetClient.getString(2));
-					user.setPassword(resultSetClient.getString(3));
+					user.setPassword(Base64.decode(resultSetClient.getString(3)));
+					user.setBanned(resultSetClient.getBoolean(5));
 					user.setAdmin(false);
 				}
 			}
@@ -192,40 +162,36 @@ public class MySQLUserDAO implements UserDAO{
 				user = new User();
 				user.setId(resultSetAdministrator.getInt(1));
 				user.setLogin(resultSetAdministrator.getString(2));
-				user.setPassword(resultSetAdministrator.getString(3));
+				user.setPassword(Base64.decode(resultSetAdministrator.getString(3)));
 				user.setAdmin(true);
 			}
 
-		} catch (InterruptedException | ConnectionPoolException e) {
-			LOGGER.error("Can not get connection from connection pool");
-		} catch (SQLException e){
+		}  catch (SQLException e){
+			logger.error(e);
 			throw new DAOException("DAO layer: cannot find user by login", e);
 		} finally {
-			closeResultSet(resultSetAdministrator);
-			closeStatement(preparedStatementAdministrator);
-			closeResultSet(resultSetClient);
-			closeStatement(preparedStatementClient);
-			if (connection != null) {
-				try {
-					connectionPool.freeConnection(connection);
-				} catch (SQLException | ConnectionPoolException e) {
-					LOGGER.error("Can not free connection from connection pool");
-				}
-			}
+			close(resultSetAdministrator, preparedStatementAdministrator, resultSetClient, preparedStatementClient);
 		}
 
 		return user;
 	}
 
+	/**
+	 * Gives a user from a database by id and role.
+	 *
+	 * @param id an id of a desired user
+	 * @param isAdmin a status of a desired user
+	 * @return a user object containing the necessary data
+	 * @throws DAOException in case of some exception with
+	 *                      a database or a connection with it
+	 */
 	@Override
 	public User findByIdAndRole(int id, boolean isAdmin) throws DAOException {
-		ConnectionPool connectionPool = ConnectionPool.getInstance();
-		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		ResultSet resultSet = null;
 		User user = null;
 		try{
-			connection = connectionPool.getConnection();
+			Connection connection = dataSource.getConnection();
 			if (isAdmin){
 				preparedStatement = connection.prepareStatement(SELECT_ADMINISTRATOR_BY_ID_QUERY);
 			} else {
@@ -242,98 +208,54 @@ public class MySQLUserDAO implements UserDAO{
 				user.setPassport(passport);
 				user.setId(resultSet.getInt(1));
 				user.setLogin(resultSet.getString(2));
-				user.setPassword(resultSet.getString(3));
+				user.setPassword(Base64.decode(resultSet.getString(3)));
 				if (!isAdmin) {
 					user.setBanned(resultSet.getBoolean(5));
 					user.setVisitsNumber(resultSet.getInt(6));
 				}
 			}
 
-		} catch (InterruptedException | ConnectionPoolException e) {
-			LOGGER.error("Can not get connection from connection pool");
-		} catch (SQLException e){
+		}  catch (SQLException e){
+			logger.error(e);
+
 			throw new DAOException("DAO layer: cannot find user by id", e);
 		} finally {
-			closeResultSet(resultSet);
-			closeStatement(preparedStatement);
-			if (connection != null) {
-				try {
-					connectionPool.freeConnection(connection);
-				} catch (SQLException | ConnectionPoolException e) {
-					LOGGER.error("Can not free connection from connection pool");
-				}
-			}
+			close(resultSet, preparedStatement);
 		}
 
 		return user;
 	}
 
+	/**
+	 * Gives a list of all users from a database.
+	 *
+	 * @return a {@link List} of users
+	 * @throws DAOException in case of some exception with
+	 *                      a database or a connection with it
+	 */
 	@Override
 	public List<User> findAll() throws DAOException {
-		ConnectionPool connectionPool = ConnectionPool.getInstance();
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet resultSet = null;
-		List<User> users = new ArrayList<>();
-		try{
-			connection = connectionPool.getConnection();
-			statement = connection.createStatement();
-
-			resultSet = statement.executeQuery(SELECT_ALL_CLIENTS_QUERY);
-
-			while(resultSet.next()){
-				User user = new User();
-				Passport passport = new Passport();
-				passport.setId(resultSet.getInt(4));
-				user.setPassport(passport);
-				user.setId(resultSet.getInt(1));
-				user.setLogin(resultSet.getString(2));
-				user.setPassword(resultSet.getString(3));
-				user.setBanned(resultSet.getBoolean(5));
-				user.setVisitsNumber(resultSet.getInt(6));
-
-				users.add(user);
-			}
-
-		} catch (InterruptedException | ConnectionPoolException e) {
-			LOGGER.error("Can not get connection from connection pool");
-		} catch (SQLException e){
-			throw new DAOException("DAO layer: cannot select all users", e);
-		} finally {
-			closeResultSet(resultSet);
-			closeStatement(statement);
-			if (connection != null) {
-				try {
-					connectionPool.freeConnection(connection);
-				} catch (SQLException | ConnectionPoolException e) {
-					LOGGER.error("Can not free connection from connection pool");
-				}
-			}
-		}
-
-		return users;
+		return select(dataSource, SELECT_ALL_CLIENTS_QUERY, "DAO layer: cannot select all users",
+				this :: createUser
+		);
 	}
 
-	public void closeStatement(Statement statement){
-		try {
-			if (statement != null) {
-				statement.close();
-			}
-		} catch (SQLException e){
-			LOGGER.error("Can not close statement");
-		}
+	/**
+	 * Creates a new {@link User} object.
+	 * @param resultSet a {@link ResultSet} object from which information will be extracted
+	 * @return a user object
+	 * @throws SQLException in cases of errors
+	 */
+	private User createUser(ResultSet resultSet) throws SQLException {
+		User user = new User();
+		Passport passport = new Passport();
+		passport.setId(resultSet.getInt(4));
+		user.setPassport(passport);
+		user.setId(resultSet.getInt(1));
+		user.setLogin(resultSet.getString(2));
+		user.setPassword(Base64.decode(resultSet.getString(3)));
+		user.setBanned(resultSet.getBoolean(5));
+		user.setVisitsNumber(resultSet.getInt(6));
+		return user;
 	}
-
-
-	public void closeResultSet(ResultSet resultSet){
-		try {
-			if (resultSet != null) {
-				resultSet.close();
-			}
-		} catch (SQLException e){
-			LOGGER.error("Can not close result set");
-		}
-	}
-
-
 }

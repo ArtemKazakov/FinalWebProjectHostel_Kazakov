@@ -3,6 +3,7 @@ package com.epam.hostel.command.impl.room;
 import com.epam.hostel.bean.entity.Discount;
 import com.epam.hostel.bean.entity.Room;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.command.util.LanguageUtil;
 import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.DiscountService;
@@ -22,11 +23,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by ASUS on 19.12.2016.
+ * Services request to the making order page.
  */
 public class FindSuitableRoomsCommand implements Command {
 
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(FindSuitableRoomsCommand.class);
 
     private static final String MAIN_PAGE = "/Controller?command=mainPage";
     private static final String JSP_PAGE_PATH = "WEB-INF/jsp/order.jsp";
@@ -62,42 +63,25 @@ public class FindSuitableRoomsCommand implements Command {
         String languageId = LanguageUtil.getLanguageId(request);
         request.setAttribute(SELECTED_LANGUAGE_REQUEST_ATTR, languageId);
 
-        String searchFormSeatsNumberString = request.getParameter(SEARCH_FORM_SEATS_NUMBER_PARAM);
-        int searchFormSeatsNumber = -1;
-        if(searchFormSeatsNumberString != null){
-            try{
-                searchFormSeatsNumber = Integer.parseInt(searchFormSeatsNumberString);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong seats number for find suitable rooms");
-            }
-        }
+        int seatsNumber = CommandHelper.getInt(request.getParameter(SEARCH_FORM_SEATS_NUMBER_PARAM));
 
-        String searchFormCheckInDateString = request.getParameter(SEARCH_FORM_CHECK_IN_DATE_PARAM);
         SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
-        Date searchFormCheckInDate = null;
-        if (searchFormCheckInDateString != null) {
+        Date checkInDate = null;
+        if (request.getParameter(SEARCH_FORM_CHECK_IN_DATE_PARAM) != null) {
             try {
-                searchFormCheckInDate = format.parse(searchFormCheckInDateString);
+                checkInDate = format.parse(request.getParameter(SEARCH_FORM_CHECK_IN_DATE_PARAM));
             } catch (ParseException | NullPointerException e) {
-                LOGGER.error("Wrong check in date for find suitable rooms");
+                logger.error("Wrong check in date for find suitable rooms");
             }
         }
 
-        String searchFormDaysStayNumberString = request.getParameter(SEARCH_FORM_DAYS_STAY_NUMBER_PARAM);
-        int searchFormDaysStayNumber = -1;
-        if(searchFormDaysStayNumberString != null){
-            try{
-                searchFormDaysStayNumber = Integer.parseInt(searchFormDaysStayNumberString);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong days stay number for find suitable rooms");
-            }
-        }
+        int daysStayNumber = CommandHelper.getInt(request.getParameter(SEARCH_FORM_DAYS_STAY_NUMBER_PARAM));
 
-        if (searchFormCheckInDate != null) {
+        if (checkInDate != null) {
             try {
                 ServiceFactory serviceFactory = ServiceFactory.getInstance();
                 RoomService roomService = serviceFactory.getRoomService();
-                List<Room> rooms = roomService.getAllSuitableRooms(searchFormCheckInDate, searchFormDaysStayNumber, searchFormSeatsNumber);
+                List<Room> rooms = roomService.getAllSuitableRooms(checkInDate, daysStayNumber, seatsNumber);
                 request.setAttribute(ROOMS_REQUEST_ATTR, rooms);
 
                 int userId = (Integer)session.getAttribute(USER_ID_SESSION_ATTRIBUTE);
@@ -105,10 +89,11 @@ public class FindSuitableRoomsCommand implements Command {
                 List<Discount> discounts = discountService.getAllUnusedDiscountsByClientId(userId);
                 request.setAttribute(USER_DISCOUNTS_REQUEST_ATTR, discounts);
 
-                request.setAttribute(CHECK_IN_DATE_REQUEST_ATTR, searchFormCheckInDateString);
-                request.setAttribute(SEATS_NUMBER_REQUEST_ATTR, searchFormSeatsNumber);
-                request.setAttribute(DAYS_STAY_NUMBER_REQUEST_ATTR, searchFormDaysStayNumber);
+                request.setAttribute(CHECK_IN_DATE_REQUEST_ATTR, request.getParameter(SEARCH_FORM_CHECK_IN_DATE_PARAM));
+                request.setAttribute(SEATS_NUMBER_REQUEST_ATTR, seatsNumber);
+                request.setAttribute(DAYS_STAY_NUMBER_REQUEST_ATTR, daysStayNumber);
             } catch (ServiceException e) {
+                logger.warn(e);
                 request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);
             }
             request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);

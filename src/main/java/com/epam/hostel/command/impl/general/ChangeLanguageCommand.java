@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * Created by ASUS on 21.11.2016.
+ * Services the request to change the language of the application.
  */
 public class ChangeLanguageCommand implements Command{
     private static final String CHANGE_LANGUAGE_PARAMETER = "changeLanguage";
@@ -35,7 +35,6 @@ public class ChangeLanguageCommand implements Command{
             if(!availableLanguages.contains(languageId)){
                 languageId = ENGLISH;
             }
-
             session.setAttribute(SESSION_LANGUAGE_ID, languageId);
         }
 

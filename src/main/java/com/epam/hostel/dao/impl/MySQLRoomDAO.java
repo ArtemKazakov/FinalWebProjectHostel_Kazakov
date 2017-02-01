@@ -2,21 +2,17 @@ package com.epam.hostel.dao.impl;
 
 import com.epam.hostel.bean.entity.Room;
 import com.epam.hostel.dao.RoomDAO;
-import com.epam.hostel.dao.connectionmanager.ConnectionPool;
-import com.epam.hostel.dao.connectionmanager.ConnectionPoolException;
 import com.epam.hostel.dao.exception.DAOException;
-import org.apache.log4j.Logger;
+import com.epam.hostel.dao.transaction.impl.TransactionManagerImpl;
 
+import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by ASUS on 02.11.2016.
+ * Provides a DAO-logic for the {@link Room} entity for the MySQL Database.
  */
-public class MySQLRoomDAO implements RoomDAO {
-
-    private final static Logger LOGGER = Logger.getRootLogger();
+public class MySQLRoomDAO extends MySQLDAO implements RoomDAO {
 
     private static final String INSERT_ROOM_QUERY = "INSERT INTO `rooms` " +
             "(`id_room`, `seats_number`, `perday_cost`) " +
@@ -30,237 +26,134 @@ public class MySQLRoomDAO implements RoomDAO {
 
     private static final String SELECT_ROOM_BY_NUMBER_QUERY = "SELECT * FROM `rooms` WHERE `id_room` = ? ";
 
-    private static final String SELECT_ALL_ROOMS_QUERY = "SELECT * FROM `rooms`";
+    private static final String SELECT_ALL_ROOMS_QUERY = "SELECT * FROM `rooms` LIMIT ?, ?;";
 
     private static final String SELECT_ROOMS_BY_SEATS_NUMBER_QUERY = "SELECT * FROM `rooms` WHERE `seats_number` = ? ";
 
+    private DataSource dataSource = (DataSource) TransactionManagerImpl.getInstance();
+
+    /**
+     * Set a {@link DataSource} object, that will give a {@link Connection}
+     * for all operation with the database.
+     *
+     * @param dataSource for setting
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * Inserts a new room into a database.
+     *
+     * @param room a room object for insertion
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
     @Override
     public void insert(Room room) throws DAOException {
-        ConnectionPool connectionPool = ConnectionPool.getInstance();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = connectionPool.getConnection();
-            preparedStatement = connection.prepareStatement(INSERT_ROOM_QUERY);
-
-            preparedStatement.setInt(1, room.getNumber());
-            preparedStatement.setInt(2, room.getSeatsNumber());
-            preparedStatement.setInt(3, room.getPerdayCost());
-
-            preparedStatement.executeUpdate();
-        } catch (InterruptedException | ConnectionPoolException e) {
-            LOGGER.error("Can not get connection from connection pool");
-        } catch (SQLException e) {
-            throw new DAOException("DAO layer: cannot insert room", e);
-        } finally {
-            closeStatement(preparedStatement);
-            if (connection != null) {
-                try {
-                    connectionPool.freeConnection(connection);
-                } catch (SQLException | ConnectionPoolException e) {
-                    LOGGER.error("Can not free connection from connection pool");
+        doDataManipulation(dataSource, INSERT_ROOM_QUERY, "DAO layer: cannot insert room",
+                preparedStatement -> {
+                    preparedStatement.setInt(1, room.getNumber());
+                    preparedStatement.setInt(2, room.getSeatsNumber());
+                    preparedStatement.setInt(3, room.getPerdayCost());
                 }
-            }
-        }
+        );
     }
 
+    /**
+     * Updates a room in a database.
+     *
+     * @param room a room object for update
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
     @Override
     public void update(Room room) throws DAOException {
-        ConnectionPool connectionPool = ConnectionPool.getInstance();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = connectionPool.getConnection();
-            preparedStatement = connection.prepareStatement(UPDATE_ROOM_QUERY);
-
-            preparedStatement.setInt(1, room.getSeatsNumber());
-            preparedStatement.setInt(2, room.getPerdayCost());
-            preparedStatement.setInt(3, room.getNumber());
-
-            preparedStatement.executeUpdate();
-        } catch (InterruptedException | ConnectionPoolException e) {
-            LOGGER.error("Can not get connection from connection pool");
-        } catch (SQLException e) {
-            throw new DAOException("DAO layer: cannot update discount", e);
-        } finally {
-            closeStatement(preparedStatement);
-            if (connection != null) {
-                try {
-                    connectionPool.freeConnection(connection);
-                } catch (SQLException | ConnectionPoolException e) {
-                    LOGGER.error("Can not free connection from connection pool");
+        doDataManipulation(dataSource, UPDATE_ROOM_QUERY, "DAO layer: cannot update room",
+                preparedStatement -> {
+                    preparedStatement.setInt(1, room.getSeatsNumber());
+                    preparedStatement.setInt(2, room.getPerdayCost());
+                    preparedStatement.setInt(3, room.getNumber());
                 }
-            }
-        }
+        );
     }
 
+    /**
+     * Deletes a room from a database by id.
+     *
+     * @param id an id of deleting room
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
     @Override
     public void delete(int id) throws DAOException {
-        ConnectionPool connectionPool = ConnectionPool.getInstance();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = connectionPool.getConnection();
-            preparedStatement = connection.prepareStatement(DELETE_ROOM_BY_ID_QUERY);
-
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-
-        } catch (InterruptedException | ConnectionPoolException e) {
-            LOGGER.error("Can not get connection from connection pool");
-        } catch (SQLException e) {
-            throw new DAOException("DAO layer: cannot delete room", e);
-        } finally {
-            closeStatement(preparedStatement);
-            if (connection != null) {
-                try {
-                    connectionPool.freeConnection(connection);
-                } catch (SQLException | ConnectionPoolException e) {
-                    LOGGER.error("Can not free connection from connection pool");
-                }
-            }
-        }
+        doDataManipulation(dataSource, DELETE_ROOM_BY_ID_QUERY, "DAO layer: cannot delete room",
+                preparedStatement -> preparedStatement.setInt(1, id)
+        );
     }
 
+    /**
+     * Gives a room from a database by number.
+     *
+     * @param number an id of a desired room
+     * @return a room object containing the necessary data
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
     @Override
     public Room findByNumber(int number) throws DAOException {
-        ConnectionPool connectionPool = ConnectionPool.getInstance();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        Room room = null;
-        try {
-            connection = connectionPool.getConnection();
-            preparedStatement = connection.prepareStatement(SELECT_ROOM_BY_NUMBER_QUERY);
-
-            preparedStatement.setInt(1, number);
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                room = new Room();
-                room.setNumber(resultSet.getInt(1));
-                room.setSeatsNumber(resultSet.getInt(2));
-                room.setPerdayCost(resultSet.getInt(3));
-            }
-
-        } catch (InterruptedException | ConnectionPoolException e) {
-            LOGGER.error("Can not get connection from connection pool");
-        } catch (SQLException e) {
-            throw new DAOException("DAO layer: cannot get all rooms", e);
-        } finally {
-            closeResultSet(resultSet);
-            closeStatement(preparedStatement);
-            if (connection != null) {
-                try {
-                    connectionPool.freeConnection(connection);
-                } catch (SQLException | ConnectionPoolException e) {
-                    LOGGER.error("Can not free connection from connection pool");
-                }
-            }
-        }
-
-        return room;
+        return singleSelect(dataSource, SELECT_ROOM_BY_NUMBER_QUERY, "DAO layer: cannot get room by number",
+                preparedStatement -> preparedStatement.setInt(1, number),
+                resultSet -> resultSet.next() ? this.createRoom(resultSet) : null
+        );
     }
 
+    /**
+     * Gives a list of all rooms from a database.
+     *
+     * @return a {@link List} of rooms
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
     @Override
-    public List<Room> findAll() throws DAOException {
-        ConnectionPool connectionPool = ConnectionPool.getInstance();
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet resultSet = null;
-        List<Room> rooms = new ArrayList<>();
-        try {
-            connection = connectionPool.getConnection();
-            statement = connection.createStatement();
-
-            resultSet = statement.executeQuery(SELECT_ALL_ROOMS_QUERY);
-
-            while (resultSet.next()) {
-                Room room = new Room();
-                room.setNumber(resultSet.getInt(1));
-                room.setSeatsNumber(resultSet.getInt(2));
-                room.setPerdayCost(resultSet.getInt(3));
-                rooms.add(room);
-            }
-
-        } catch (InterruptedException | ConnectionPoolException e) {
-            LOGGER.error("Can not get connection from connection pool");
-        } catch (SQLException e) {
-            throw new DAOException("DAO layer: cannot get all rooms", e);
-        } finally {
-            closeResultSet(resultSet);
-            closeStatement(statement);
-            if (connection != null) {
-                try {
-                    connectionPool.freeConnection(connection);
-                } catch (SQLException | ConnectionPoolException e) {
-                    LOGGER.error("Can not free connection from connection pool");
-                }
-            }
-        }
-
-        return rooms;
+    public List<Room> findAll(int start, int amount) throws DAOException {
+        return select(dataSource, SELECT_ALL_ROOMS_QUERY, "DAO layer: cannot get all rooms",
+                preparedStatement -> {
+                    preparedStatement.setInt(1, start);
+                    preparedStatement.setInt(2, amount);
+                },
+                this::createRoom
+        );
     }
 
+    /**
+     * Gives a list of rooms from a database by seats number.
+     *
+     * @param seatsNumber a seats number of desired rooms
+     * @return a {@link List} of rooms containing the necessary data
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
     @Override
     public List<Room> findBySeatsNumber(int seatsNumber) throws DAOException {
-        ConnectionPool connectionPool = ConnectionPool.getInstance();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<Room> rooms = new ArrayList<>();
-        try {
-            connection = connectionPool.getConnection();
-            preparedStatement = connection.prepareStatement(SELECT_ROOMS_BY_SEATS_NUMBER_QUERY);
-
-            preparedStatement.setInt(1, seatsNumber);
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Room room = new Room();
-                room.setNumber(resultSet.getInt(1));
-                room.setSeatsNumber(resultSet.getInt(2));
-                room.setPerdayCost(resultSet.getInt(3));
-                rooms.add(room);
-            }
-
-        } catch (InterruptedException | ConnectionPoolException e) {
-            LOGGER.error("Can not get connection from connection pool");
-        } catch (SQLException e) {
-            throw new DAOException("DAO layer: cannot get rooms by seats number", e);
-        } finally {
-            closeResultSet(resultSet);
-            closeStatement(preparedStatement);
-            if (connection != null) {
-                try {
-                    connectionPool.freeConnection(connection);
-                } catch (SQLException | ConnectionPoolException e) {
-                    LOGGER.error("Can not free connection from connection pool");
-                }
-            }
-        }
-
-        return rooms;
+        return select(dataSource, SELECT_ROOMS_BY_SEATS_NUMBER_QUERY, "DAO layer: cannot get rooms by seats number",
+                preparedStatement -> preparedStatement.setInt(1, seatsNumber),
+                this::createRoom
+        );
     }
 
-    public void closeStatement(Statement statement) {
-        try {
-            if (statement != null) {
-                statement.close();
-            }
-        } catch (SQLException e) {
-            LOGGER.error("Can not close statement");
-        }
-    }
-
-
-    public void closeResultSet(ResultSet resultSet) {
-        try {
-            if (resultSet != null) {
-                resultSet.close();
-            }
-        } catch (SQLException e) {
-            LOGGER.error("Can not close result set");
-        }
+    /**
+     * Creates a new {@link Room} object.
+     *
+     * @param resultSet a {@link ResultSet} object from which information will be extracted
+     * @return a room object
+     * @throws SQLException in cases of errors
+     */
+    private Room createRoom(ResultSet resultSet) throws SQLException {
+        Room room = new Room();
+        room.setNumber(resultSet.getInt(1));
+        room.setSeatsNumber(resultSet.getInt(2));
+        room.setPerdayCost(resultSet.getInt(3));
+        return room;
     }
 }

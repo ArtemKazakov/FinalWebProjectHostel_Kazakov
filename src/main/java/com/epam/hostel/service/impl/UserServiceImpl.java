@@ -6,145 +6,181 @@ import com.epam.hostel.dao.PassportDAO;
 import com.epam.hostel.dao.UserDAO;
 import com.epam.hostel.dao.exception.DAOException;
 import com.epam.hostel.dao.factory.DAOFactory;
+import com.epam.hostel.dao.transaction.TransactionManager;
+import com.epam.hostel.dao.transaction.impl.TransactionManagerImpl;
 import com.epam.hostel.service.UserService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.exception.ServiceWrongLoginException;
 import com.epam.hostel.service.exception.ServiceWrongPasswordException;
+import com.epam.hostel.service.util.PasswordHelper;
 import com.epam.hostel.service.util.Validator;
+import org.apache.log4j.Logger;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Created by ASUS on 09.11.2016.
+ * Provides a business-logic with the {@link User} entity and relate with it.
  */
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends Service implements UserService {
+    private static final Logger logger = Logger.getLogger(UserServiceImpl.class);
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final PassportDAO passportDAO = DAOFactory.getInstance().getPassportDAO();
+    private static TransactionManager transactionManager = TransactionManagerImpl.getInstance();
 
-    private static final int SERIES_MAX_LENGTH = 2;
-    private static final int SURNAME_MAX_LENGTH = 40;
-    private static final int NAME_MAX_LENGTH = 40;
-    private static final int PATRONYMIC_MAX_LENGTH = 40;
-
+    /**
+     * Return a user from a data source by id and role
+     *
+     * @param id      an id of the user
+     * @param isAdmin a role of the user
+     * @return a user
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
     @Override
     public User getUserByIdAndRole(int id, boolean isAdmin) throws ServiceException {
-        if(!Validator.validateInt(id)){
+        if (!Validator.validateInt(id)) {
             throw new ServiceException("Wrong id for getting user");
         }
 
-        DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
-        UserDAO userDAO = factory.getUserDAO();
-        PassportDAO passportDAO = factory.getPassportDAO();
-
-        try{
-            User user = userDAO.findByIdAndRole(id, isAdmin);
-            if(user != null){
-                Passport passport = passportDAO.findById(user.getPassport().getId());
+        try {
+            User user = transactionManager.doInTransaction(() -> userDAO.findByIdAndRole(id, isAdmin));
+            if (user != null) {
+                Passport passport = transactionManager.doInTransaction(() -> passportDAO.findById(user.getPassport().getId()));
                 user.setPassport(passport);
             }
             return user;
-        } catch (DAOException e){
+        } catch (DAOException e) {
+            logger.error(e);
             throw new ServiceException("Service layer: cannot get user by id", e);
         }
     }
 
+    /**
+     * Updates a user account and passport in a data source
+     *
+     * @param user     an user account
+     * @param passport an user passport
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
     @Override
-    public void updateUser(int id, String login, String password, int identificationNumber, String series,
-                           String surname, String name, String patronymic, Date birthday) throws ServiceException {
-        if(!Validator.validateLogin(login)){
+    public void updateUser(User user, Passport passport) throws ServiceException {
+        if (!Validator.validateLogin(user.getLogin())) {
             throw new ServiceWrongLoginException("Wrong login");
         }
-        if(!Validator.validatePassword(password)){
+        if (!Validator.validatePassword(user.getPassword())) {
             throw new ServiceWrongPasswordException("Wrong password");
         }
-        if(!Validator.validateInt(id) || !Validator.validatePassportIdNumber(identificationNumber) ||
-                !Validator.validatePassportSeries(series) || !Validator.validateName(surname) ||
-                !Validator.validateName(name)
-                || !Validator.validateName(patronymic) ||  birthday == null){
-            throw new ServiceException("Wrong parameters for registration");
+        if (!Validator.validateInt(passport.getId()) ||
+                !Validator.validatePassportIdNumber(passport.getIdentificationNumber()) ||
+                !Validator.validatePassportSeries(passport.getSeries()) ||
+                !Validator.validateName(passport.getSurname()) ||
+                !Validator.validateName(passport.getName()) ||
+                !Validator.validateName(passport.getPatronymic()) ||
+                !Validator.validateBirthdayDate(passport.getBirthday())) {
+            throw new ServiceException("Wrong parameters for updating user");
         }
 
-        DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
-        UserDAO userDAO = factory.getUserDAO();
-        PassportDAO passportDAO = factory.getPassportDAO();
+        byte[] encryptPassword = PasswordHelper.getInstance().encryptPassword(user.getPassword());
 
-        try{
-            User userWithThisId = userDAO.findByIdAndRole(id, false);
+        try {
+            User userWithThisId = transactionManager.doInTransaction(() -> userDAO.findByIdAndRole(user.getId(), false));
+            User userWithThisLogin = transactionManager.doInTransaction(() -> userDAO.findByLogin(user.getLogin()));
 
-            User user = new User();
-            user.setLogin(login);
-            user.setPassword(password);
-            user.setId(id);
+            if (userWithThisLogin != null && userWithThisLogin.getId() != user.getId()) {
+                throw new ServiceWrongLoginException("Wrong login");
+            }
 
-            userDAO.update(user);
+            user.setPassword(encryptPassword);
 
-            Passport passport = new Passport();
-            passport.setId(userWithThisId.getPassport().getId());
-            passport.setIdentificationNumber(identificationNumber);
-            passport.setSeries(series);
-            passport.setSurname(surname);
-            passport.setName(name);
-            passport.setPatronymic(patronymic);
-            passport.setBirthday(birthday);
+            transactionManager.doInTransaction(() -> {
+                userDAO.update(user);
 
-            passportDAO.update(passport);
+                passport.setId(userWithThisId.getPassport().getId());
 
-        } catch (DAOException e){
+                passportDAO.update(passport);
+                return Optional.empty();
+            });
+        } catch (DAOException e) {
+            logger.error(e);
             throw new ServiceException("Service layer: cannot make a registration", e);
+        } finally {
+            PasswordHelper.dispose(encryptPassword);
         }
     }
 
+    /**
+     * Return all users from a data source
+     *
+     * @return a {@link List} of users
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
     @Override
     public List<User> getAllUsers() throws ServiceException {
-        DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
-        UserDAO userDao = factory.getUserDAO();
-        PassportDAO passportDAO = factory.getPassportDAO();
-        List<User> users = null;
-
-        try{
-            users = userDao.findAll();
-            for (User user : users){
-                Passport passport = passportDAO.findById(user.getPassport().getId());
-                user.setPassport(passport);
-            }
-            return users;
+        try {
+            return transactionManager.doInTransaction(() -> {
+                List<User> users = userDAO.findAll();
+                for (User user : users) {
+                    Passport passport = passportDAO.findById(user.getPassport().getId());
+                    user.setPassport(passport);
+                }
+                return users;
+            });
         } catch (DAOException e) {
+            logger.error(e);
             throw new ServiceException("Service layer: cannot get all rooms", e);
         }
     }
 
+    /**
+     * Updates a user ban status in a data source
+     *
+     * @param id     an id of the user
+     * @param banned a status of ban
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
     @Override
     public void banUser(int id, boolean banned) throws ServiceException {
-        if(!Validator.validateInt(id)){
+        if (!Validator.validateInt(id)) {
             throw new ServiceException("Wrong parameters for ban user");
         }
-
-        DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
-        UserDAO userDAO = factory.getUserDAO();
 
         User user = new User();
         user.setId(id);
         user.setBanned(banned);
 
-        try{
-            userDAO.updateBanned(user);
-        } catch (DAOException e){
-            throw new ServiceException("Service layer: cannot ban user", e);
-        }
+        this.service("Service layer: cannot ban user",
+                () -> {
+                    userDAO.updateBanned(user);
+                    return Optional.empty();
+                }
+        );
     }
 
+    /**
+     * Deletes a user from a data source by id
+     *
+     * @param id an id of user for deleting
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
     @Override
     public void deleteUser(int id) throws ServiceException {
-        if(!Validator.validateInt(id)){
+        if (!Validator.validateInt(id)) {
             throw new ServiceException("Wrong id for deleting user");
         }
 
-        DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
-        UserDAO userDAO = factory.getUserDAO();
-
-        try{
-            userDAO.delete(id);
-        } catch (DAOException e){
-            throw new ServiceException("Service layer: cannot delete user", e);
-        }
+        this.service("Service layer: cannot delete user",
+                () -> {
+                    User user = userDAO.findByIdAndRole(id, false);
+                    userDAO.delete(id);
+                    passportDAO.delete(user.getPassport().getId());
+                    return Optional.empty();
+                }
+        );
     }
+
 }

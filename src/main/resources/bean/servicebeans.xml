@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://hostel.com/bean"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://hostel.com/bean http://hostel.com/bean.xsd">
+
+    <bean name="siteService" class="com.epam.hostel.service.impl.SiteServiceImpl"/>
+
+    <bean name="poolService" class="com.epam.hostel.service.impl.PoolServiceImpl"/>
+
+    <bean name="roomService" class="com.epam.hostel.service.impl.RoomServiceImpl"/>
+
+    <bean name="userService" class="com.epam.hostel.service.impl.UserServiceImpl"/>
+
+    <bean name="discountService" class="com.epam.hostel.service.impl.DiscountServiceImpl"/>
+
+    <bean name="rentalRequestService" class="com.epam.hostel.service.impl.RentalRequestServiceImpl"/>
+
+    <bean name="scheduleRecordService" class="com.epam.hostel.service.impl.ScheduleRecordServiceImpl"/>
+
+</beans>

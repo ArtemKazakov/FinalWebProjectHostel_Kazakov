@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://hostel.com/command"
+            xmlns:cmd="http://hostel.com/command"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:element name="commands">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="command" type="cmd:commandType" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="commandType">
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="class" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="method" type="cmd:methodType" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="methodType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="POST"/>
+            <xsd:enumeration value="GET"/>
+            <xsd:enumeration value="OPTIONS"/>
+            <xsd:enumeration value="HEAD"/>
+            <xsd:enumeration value="PUT"/>
+            <xsd:enumeration value="PATCH"/>
+            <xsd:enumeration value="DELETE"/>
+            <xsd:enumeration value="TRACE"/>
+            <xsd:enumeration value="CONNECT"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

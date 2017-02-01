@@ -7,100 +7,109 @@ import com.epam.hostel.dao.PassportDAO;
 import com.epam.hostel.dao.UserDAO;
 import com.epam.hostel.dao.exception.DAOException;
 import com.epam.hostel.dao.factory.DAOFactory;
+import com.epam.hostel.dao.transaction.TransactionManager;
+import com.epam.hostel.dao.transaction.impl.TransactionManagerImpl;
 import com.epam.hostel.service.SiteService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.exception.ServiceWrongLoginException;
 import com.epam.hostel.service.exception.ServiceWrongPasswordException;
+import com.epam.hostel.service.util.PasswordHelper;
 import com.epam.hostel.service.util.Validator;
+import org.apache.log4j.Logger;
 
-import java.util.Date;
+import java.util.Optional;
 
 /**
- * Created by ASUS on 19.10.2016.
+ * Provides a business-logic with the {@link User} entity and the {@link Passport} entity.
  */
-public class SiteServiceImpl implements SiteService {
+public class SiteServiceImpl extends Service implements SiteService {
+    private static final Logger logger = Logger.getLogger(SiteServiceImpl.class);
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final PassportDAO passportDAO = DAOFactory.getInstance().getPassportDAO();
+    private static TransactionManager transactionManager = TransactionManagerImpl.getInstance();
 
-    private static final int SERIES_MAX_LENGTH = 2;
-    private static final int SURNAME_MAX_LENGTH = 40;
-    private static final int NAME_MAX_LENGTH = 40;
-    private static final int PATRONYMIC_MAX_LENGTH = 40;
-
-
+    /**
+     * Checks if a user with this login and password can log in to the system.
+     *
+     * @param login    a login of the user
+     * @param password a password of the user
+     * @return an user object if log in success
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
     @Override
-    public User logIn(String login, String password) throws ServiceException {
-        if(!Validator.validateLogin(login)){
+    public User logIn(String login, byte[] password) throws ServiceException {
+        if (!Validator.validateLogin(login)) {
             throw new ServiceWrongLoginException("Wrong login");
         }
-        if(!Validator.validatePassword(password)){
+        if (!Validator.validatePassword(password)) {
             throw new ServiceWrongPasswordException("Wrong password");
         }
 
-
-        DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
-        UserDAO dao = factory.getUserDAO();
-
         try {
-            User user = dao.findByLogin(login);
-            if(user == null){
+            User user = transactionManager.doInTransaction(() -> userDAO.findByLogin(login));
+            if (user == null) {
                 throw new ServiceWrongLoginException("Wrong login");
             }
-            if(!user.getPassword().equals(password)){
+            if (!PasswordHelper.getInstance().match(password, user.getPassword())) {
                 throw new ServiceWrongPasswordException("Wrong password");
             }
             return user;
         } catch (DAOException e) {
+            logger.error(e);
             throw new ServiceException("Service layer: cannot make a login operation", e);
         }
     }
 
+    /**
+     * Registers a new user to the system.
+     *
+     * @param user     an user account
+     * @param passport an user passport
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
     @Override
-    public void registration(String login, String password, int identificationNumber, String series, String surname,
-                             String name, String patronymic, Date birthday) throws ServiceException{
-        if(!Validator.validateLogin(login)){
+    public void registration(User user, Passport passport) throws ServiceException {
+        if (!Validator.validateLogin(user.getLogin())) {
             throw new ServiceWrongLoginException("Wrong login");
         }
-        if(!Validator.validatePassword(password)){
+        if (!Validator.validatePassword(user.getPassword())) {
             throw new ServiceWrongPasswordException("Wrong password");
         }
-        if(!Validator.validatePassportIdNumber(identificationNumber) ||
-                !Validator.validatePassportSeries(series) || !Validator.validateName(surname) ||
-                !Validator.validateName(name)
-                || !Validator.validateName(patronymic) ||  birthday == null){
+        if (!Validator.validateInt(passport.getId()) ||
+                !Validator.validatePassportIdNumber(passport.getIdentificationNumber()) ||
+                !Validator.validatePassportSeries(passport.getSeries()) ||
+                !Validator.validateName(passport.getSurname()) ||
+                !Validator.validateName(passport.getName()) ||
+                !Validator.validateName(passport.getPatronymic()) ||
+                !Validator.validateBirthdayDate(passport.getBirthday())) {
             throw new ServiceException("Wrong parameters for registration");
         }
 
-        DAOFactory factory = DAOFactory.getInstance(DAOFactory.Factories.MYSQL);
-        UserDAO userDAO = factory.getUserDAO();
-        PassportDAO passportDAO = factory.getPassportDAO();
+        byte[] encryptPassword = PasswordHelper.getInstance().encryptPassword(user.getPassword());
 
-        try{
-            User userWithThisLogin = userDAO.findByLogin(login);
-            if(userWithThisLogin != null){
+        try {
+            User userWithThisLogin = transactionManager.doInTransaction(() -> userDAO.findByLogin(user.getLogin()));
+            if (userWithThisLogin != null) {
                 throw new ServiceWrongLoginException("Wrong login");
             }
+            transactionManager.doInTransaction(() -> {
+                int passportId = passportDAO.insert(passport);
+                passport.setId(passportId);
 
-            Passport passport = new Passport();
-            passport.setIdentificationNumber(identificationNumber);
-            passport.setSeries(series);
-            passport.setSurname(surname);
-            passport.setName(name);
-            passport.setPatronymic(patronymic);
-            passport.setBirthday(birthday);
+                user.setPassword(encryptPassword);
+                user.setPassport(passport);
 
-            int passportId = passportDAO.insert(passport);
-            passport.setId(passportId);
-
-            User user = new User();
-            user.setLogin(login);
-            user.setPassword(password);
-            user.setPassport(passport);
-
-            userDAO.insert(user);
-
-        } catch (DAOException e){
+                userDAO.insert(user);
+                return Optional.empty();
+            });
+        } catch (DAOException e) {
+            logger.error(e);
             throw new ServiceException("Service layer: cannot make a registration", e);
+        } finally {
+            PasswordHelper.dispose(encryptPassword);
         }
     }
-
 
 }

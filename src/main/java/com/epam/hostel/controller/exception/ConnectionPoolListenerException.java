@@ -1,4 +1,4 @@
-package com.epam.hostel.controller.listener;
+package com.epam.hostel.controller.exception;
 
 public class ConnectionPoolListenerException extends RuntimeException {
     public ConnectionPoolListenerException(String message) {

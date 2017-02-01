@@ -1,6 +1,7 @@
 package com.epam.hostel.command.impl.rentalrequest;
 
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.service.RentalRequestService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.factory.ServiceFactory;
@@ -13,10 +14,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 13.01.2017.
+ * Services request from the deleting rental request form.
  */
 public class DeleteRentalRequestCommand implements Command {
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(DeleteRentalRequestCommand.class);
 
     private static final String REDIRECT_PAGE = "/Controller?command=viewRequestsList";
     private static final String MAIN_PAGE = "/Controller?command=mainPage";
@@ -39,15 +40,7 @@ public class DeleteRentalRequestCommand implements Command {
             return;
         }
 
-        String idRentalRequestStr = request.getParameter(RENTAL_REQUEST_ID_PARAM);
-        int idRentalRequest = -1;
-        if (idRentalRequestStr != null) {
-            try {
-                idRentalRequest = Integer.parseInt(idRentalRequestStr);
-            } catch (NumberFormatException e) {
-                LOGGER.error("Wrong rental request id for deleting rental request");
-            }
-        }
+        int idRentalRequest = CommandHelper.getInt(request.getParameter(RENTAL_REQUEST_ID_PARAM));
 
         try {
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
@@ -55,6 +48,7 @@ public class DeleteRentalRequestCommand implements Command {
             rentalRequestService.deleteRentalRequest(idRentalRequest);
             response.sendRedirect(REDIRECT_PAGE);
         } catch (ServiceException e) {
+            logger.warn(e);
             response.sendRedirect(REDIRECT_PAGE + AMP + SERVICE_ERROR_REQUEST_ATTR + EQ + true);
         }
 

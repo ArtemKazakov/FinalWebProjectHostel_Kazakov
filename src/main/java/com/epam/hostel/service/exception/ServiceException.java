@@ -1,5 +1,8 @@
 package com.epam.hostel.service.exception;
 
+/**
+ * Exception that connected with Service layer work.
+ */
 public class ServiceException extends Exception {
 	private static final long serialVersionUID = 1L;
 

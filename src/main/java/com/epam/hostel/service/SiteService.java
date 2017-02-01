@@ -2,18 +2,33 @@ package com.epam.hostel.service;
 
 
 import com.epam.hostel.bean.entity.User;
+import com.epam.hostel.bean.entity.Passport;
 import com.epam.hostel.service.exception.ServiceException;
 
-import java.util.Date;
-
 /**
- * Created by ASUS on 19.10.2016.
+ * Provides a business-logic with the {@link User} entity and the {@link Passport} entity.
  */
 public interface SiteService {
 
-    User logIn(String login, String password) throws ServiceException;
+    /**
+     * Checks if a user with this login and password can log in to the system.
+     *
+     * @param login    a login of the user
+     * @param password a password of the user
+     * @return an user object if log in success
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
+    User logIn(String login, byte[] password) throws ServiceException;
 
-    void registration(String login, String password, int identificationNumber, String series, String surname,
-                      String name, String patronymic, Date birthday) throws ServiceException;
+    /**
+     * Registers a new user to the system.
+     *
+     * @param user     an user account
+     * @param passport an user passport
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
+    void registration(User user, Passport passport) throws ServiceException;
 }
 

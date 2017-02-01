@@ -3,114 +3,46 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <f:setLocale value="${requestScope.selectedLanguage}"/>
-<f:setBundle basename="locale" var="locale"/>
-<f:message bundle="${locale}" key="locale.siteName" var="siteName"/>
-<f:message bundle="${locale}" key="locale.mainPage" var="mainPage"/>
-<f:message bundle="${locale}" key="locale.login" var="login"/>
-<f:message bundle="${locale}" key="locale.password" var="password"/>
-<f:message bundle="${locale}" key="locale.loginButton" var="loginButton"/>
-<f:message bundle="${locale}" key="locale.logoutButtom" var="logoutButton"/>
-<f:message bundle="${locale}" key="locale.signupButton" var="signupButton"/>
-<f:message bundle="${locale}" key="locale.account" var="accountButton"/>
-<f:message bundle="${locale}" key="locale.rooms" var="rooms"/>
-<f:message bundle="${locale}" key="locale.number" var="number"/>
-<f:message bundle="${locale}" key="locale.seatsNumber" var="seatsNumber"/>
-<f:message bundle="${locale}" key="locale.perdayCost" var="perdayCost"/>
-<f:message bundle="${locale}" key="locale.singleRooms" var="singleRooms"/>
-<f:message bundle="${locale}" key="locale.doubleRooms" var="doubleRooms"/>
-<f:message bundle="${locale}" key="locale.tripleRooms" var="tripleRooms"/>
-<f:message bundle="${locale}" key="locale.quadrupleRooms" var="quadrupleRooms"/>
-<f:message bundle="${locale}" key="locale.allRooms" var="allRooms"/>
-<f:message bundle="${locale}" key="locale.addRoomButton" var="addRoomButton"/>
-<f:message bundle="${locale}" key="locale.applyButton" var="applyButton"/>
-<f:message bundle="${locale}" key="locale.serverError" var="serverError"/>
-<f:message bundle="${locale}" key="locale.addRoomSuccess" var="addRoomSuccess"/>
-<f:message bundle="${locale}" key="locale.editRoomSuccess" var="editRoomSuccess"/>
-<f:message bundle="${locale}" key="locale.deleteRoomSuccess" var="deleteRoomSuccess"/>
-<f:message bundle="${locale}" key="locale.existingRoomError" var="existingRoomError"/>
-<f:message bundle="${locale}" key="locale.closeButton" var="closeButton"/>
-<f:message bundle="${locale}" key="locale.deleteButton" var="deleteButton"/>
-<f:message bundle="${locale}" key="locale.editButton" var="editButton"/>
-<f:message bundle="${locale}" key="locale.saveButton" var="saveButton"/>
-<f:message bundle="${locale}" key="locale.editRoom" var="editRoom"/>
+<f:setBundle basename="local" var="local"/>
+<f:message bundle="${local}" key="local.siteName" var="siteName"/>
+<f:message bundle="${local}" key="local.login" var="login"/>
+<f:message bundle="${local}" key="local.password" var="password"/>
+<f:message bundle="${local}" key="local.number" var="number"/>
+<f:message bundle="${local}" key="local.rooms" var="rooms"/>
+<f:message bundle="${local}" key="local.seatsNumber" var="seatsNumber"/>
+<f:message bundle="${local}" key="local.perdayCost" var="perdayCost"/>
+<f:message bundle="${local}" key="local.singleRooms" var="singleRooms"/>
+<f:message bundle="${local}" key="local.doubleRooms" var="doubleRooms"/>
+<f:message bundle="${local}" key="local.tripleRooms" var="tripleRooms"/>
+<f:message bundle="${local}" key="local.quadrupleRooms" var="quadrupleRooms"/>
+<f:message bundle="${local}" key="local.allRooms" var="allRooms"/>
+<f:message bundle="${local}" key="local.addRoomButton" var="addRoomButton"/>
+<f:message bundle="${local}" key="local.applyButton" var="applyButton"/>
+<f:message bundle="${local}" key="local.serverError" var="serverError"/>
+<f:message bundle="${local}" key="local.addRoomSuccess" var="addRoomSuccess"/>
+<f:message bundle="${local}" key="local.editRoomSuccess" var="editRoomSuccess"/>
+<f:message bundle="${local}" key="local.deleteRoomSuccess" var="deleteRoomSuccess"/>
+<f:message bundle="${local}" key="local.existingRoomError" var="existingRoomError"/>
+<f:message bundle="${local}" key="local.closeButton" var="closeButton"/>
+<f:message bundle="${local}" key="local.deleteButton" var="deleteButton"/>
+<f:message bundle="${local}" key="local.editButton" var="editButton"/>
+<f:message bundle="${local}" key="local.saveButton" var="saveButton"/>
+<f:message bundle="${local}" key="local.editRoom" var="editRoom"/>
 
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${siteName}</title>
-    <link rel="shortcut icon" href="../../img/hostel_icon.png" type="image/png">
-    <link rel="stylesheet" href="../../css/bootstrap.css">
-    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="shortcut icon" href="${pageContext.request.contextPath}/img/hostel_icon.png" type="image/png">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                    aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="Controller?command=mainPage">${mainPage}</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="Controller?command=viewRoomsList">${rooms}</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <c:if test="${sessionScope.userId == null}">
-                    <li>
-                        <form class="navbar-form" action="Controller" method="post">
-                            <input type="hidden" name="command" value="log_in"/>
-                            <div class="form-group">
-                                <input type="text" name="logInFormLogin" placeholder="${login}" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <input type="password" name="logInFormPassword" placeholder="${password}"
-                                       class="form-control">
-                            </div>
-                            <button type="submit" class="btn btn-success">${loginButton}</button>
-                        </form>
-                    </li>
-                    <li><a href="Controller?command=registration"><span
-                            class="glyphicon glyphicon-user"></span> ${signupButton}</a></li>
-                </c:if>
-                <c:if test="${sessionScope.userId != null}">
-                    <li>
-                        <form class="navbar-form navbar-right" action="Controller" method="post">
-                            <input type="hidden" name="command" value="log_out"/>
-                            <button type="submit" class="btn btn-success">${logoutButton}</button>
-                        </form>
-                    </li>
-                    <li><a href="Controller?command=userAccount"><span
-                            class="glyphicon glyphicon-user"></span> ${accountButton}</a></li>
-                </c:if>
-                <c:if test='${requestScope.selectedLanguage eq "EN"}'>
-                    <li>
-                        <form class="navbar-form" id="change-language-ru" action="Controller?command=changeLanguage"
-                              method="post"><input type="hidden" name="changeLanguage" value="RU">
-                            <button type="submit" class="btn btn-danger">RU</button>
-                        </form>
-                    </li>
-                </c:if>
-                <c:if test='${requestScope.selectedLanguage eq "RU"}'>
-                    <li>
-                        <form class="navbar-form" id="change-language-en" action="Controller?command=changeLanguage"
-                              method="post"><input type="hidden" name="changeLanguage" value="EN">
-                            <button type="submit" class="btn btn-danger">EN</button>
-                        </form>
-                    </li>
-                </c:if>
-            </ul>
-        </div>
-    </div>
-</nav>
+<c:import url="template/header.jsp"/>
 
 <div class="container">
     <br>
@@ -120,11 +52,19 @@
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
-            <li><a href="Controller?command=viewRoomsList">${allRooms}</a></li>
-            <li><a href="Controller?command=viewRoomsList&seatsNumber=1">${singleRooms}</a></li>
-            <li><a href="Controller?command=viewRoomsList&seatsNumber=2">${doubleRooms}</a></li>
-            <li><a href="Controller?command=viewRoomsList&seatsNumber=3">${tripleRooms}</a></li>
-            <li><a href="Controller?command=viewRoomsList&seatsNumber=4">${quadrupleRooms}</a></li>
+            <li><a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList">${allRooms}</a></li>
+            <li>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=1">${singleRooms}</a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=2">${doubleRooms}</a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=3">${tripleRooms}</a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=4">${quadrupleRooms}</a>
+            </li>
         </ul>
     </div>
     <c:if test="${sessionScope.userRole}">
@@ -138,7 +78,7 @@
                         <h4 class="modal-title">${addRoomButton}</h4>
                     </div>
                     <div class="modal-body">
-                        <form action="Controller" method="post">
+                        <form action="${pageContext.request.contextPath}/Controller" method="post">
                             <input type="hidden" name="command" value="addRoom"/>
                             <div class="form-group">
                                 <label for="addRoomNumber">${number}:</label>
@@ -201,7 +141,7 @@
         </c:if>
     </c:if>
     <hr>
-    <table class="table table-striped">
+    <table class="table table-striped" id="room-table">
         <tr>
             <c:if test="${sessionScope.userRole}">
                 <th></th>
@@ -214,7 +154,7 @@
             <tr>
                 <c:if test="${sessionScope.userRole}">
                     <td>
-                        <a href="Controller?command=deleteRoom&deleteFormRoomNumber=${room.number}"
+                        <a href="${pageContext.request.contextPath}/Controller?command=deleteRoom&deleteFormRoomNumber=${room.number}"
                            class="btn btn-default">${deleteButton}</a>
                         <button class="btn btn-default" type="button" data-toggle="modal"
                                 data-target="#editRoomModal${room.number}">${editButton}</button>
@@ -226,9 +166,10 @@
                                         <h4 class="modal-title">${editRoom}</h4>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="Controller" method="post">
+                                        <form action="${pageContext.request.contextPath}/Controller" method="post">
                                             <input type="hidden" name="command" value="editRoom"/>
-                                            <input type="hidden" name="editFormOriginalRoomNumber" value="${room.number}"/>
+                                            <input type="hidden" name="editFormOriginalRoomNumber"
+                                                   value="${room.number}"/>
                                             <div class="form-group">
                                                 <label for="editRoomNumber">${number}:</label>
                                                 <input name="editFormRoomNumber" type="number" value="${room.number}"
@@ -266,15 +207,15 @@
             </tr>
         </c:forEach>
     </table>
-
+    <button onclick="getRooms(2)">more</button>
     <hr>
 
-    <footer>
-        <p>&copy; 2016 ${siteName}</p>
-    </footer>
 </div>
 
-<script type="text/javascript" src="js/jquery.min.js"></script>
-<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<c:import url="template/footer.jsp"/>
+
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/ajaxviewrooms.js"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import com.epam.hostel.bean.entity.Discount;
 import com.epam.hostel.bean.entity.RentalRequest;
 import com.epam.hostel.bean.entity.User;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.command.util.LanguageUtil;
 import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.DiscountService;
@@ -21,10 +22,10 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Created by ASUS on 22.11.2016.
+ * Services request to the user account page.
  */
 public class ViewUserCommand implements Command {
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(ViewUserCommand.class);
 
     private static final String SESSION_TIMEOUT_PAGE = "/Controller?command=mainPage";
     private static final String CLIENT_ACCOUNT_PAGE = "WEB-INF/jsp/client-account.jsp";
@@ -47,15 +48,7 @@ public class ViewUserCommand implements Command {
             return;
         }
 
-        String idStr = request.getParameter(CLIENT_ID_PARAM);
-        int id = -1;
-        if(idStr != null){
-            try{
-                id = Integer.parseInt(idStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong id for view user");
-            }
-        }
+        int id = CommandHelper.getInt(request.getParameter(CLIENT_ID_PARAM));
 
         QueryUtil.saveCurrentQueryToSession(request);
         String languageId = LanguageUtil.getLanguageId(request);
@@ -80,6 +73,7 @@ public class ViewUserCommand implements Command {
             }
             request.getRequestDispatcher(CLIENT_ACCOUNT_PAGE).forward(request, response);
         } catch (ServiceException e) {
+            logger.warn(e);
             request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);
             request.getRequestDispatcher(SESSION_TIMEOUT_PAGE).forward(request, response);
         }

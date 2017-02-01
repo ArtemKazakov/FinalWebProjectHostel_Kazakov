@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://hostel.com/bean"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://hostel.com/bean http://hostel.com/bean.xsd">
+
+    <bean name="passportDAO" class="com.epam.hostel.dao.impl.MySQLPassportDAO"/>
+
+    <bean name="poolDAO" class="com.epam.hostel.dao.impl.MySQLPoolDAO"/>
+
+    <bean name="roomDAO" class="com.epam.hostel.dao.impl.MySQLRoomDAO"/>
+
+    <bean name="userDAO" class="com.epam.hostel.dao.impl.MySQLUserDAO"/>
+
+    <bean name="discountDAO" class="com.epam.hostel.dao.impl.MySQLDiscountDAO"/>
+
+    <bean name="requestDAO" class="com.epam.hostel.dao.impl.MySQLRequestDAO"/>
+
+    <bean name="scheduleRecordDAO" class="com.epam.hostel.dao.impl.MySQLScheduleRecordDAO"/>
+
+</beans>

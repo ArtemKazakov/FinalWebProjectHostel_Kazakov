@@ -1,7 +1,12 @@
+@font-face {
+    font-family: Ubuntu;
+    src: url(../fonts/Ubuntu-R.ttf);
+}
+
 body {
     padding-top: 50px;
     padding-bottom: 20px;
-    font-family: Roboto,arial;
+    font-family: Ubuntu;
 }
 
 #user-edit{
@@ -22,7 +27,7 @@ body {
     margin-bottom: 1px;
     position: relative;
     color: #fff;
-    font: 3.5em Roboto, 'Roboto Regular', arial;
+    font-size: 3.5em;
     padding-left: 1px;
     width: 100%;
 }

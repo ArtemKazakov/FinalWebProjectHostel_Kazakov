@@ -1,172 +1,152 @@
 package com.epam.hostel.dao.connectionmanager;
 
+import com.epam.hostel.dao.exception.ConnectionPoolException;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by ASUS on 27.10.2016.
+ * Stores a limit number of connections.
  */
 public class ConnectionPool {
 
-    private static final Logger LOGGER = Logger.getRootLogger();
+    private static final Logger logger = Logger.getLogger(ConnectionPool.class);
 
-    private static final String RESOURCE_BUNDLE_NAME = "mysql-connection";
+    private static final String DB_PROPERTY_RESOURCE_BUNDLE = "mysql-connection";
     private static final String DRIVER_CLASS_NAME_PROPERTY = "driverClassName";
     private static final String HOST_CONNECTION_STRING_PROPERTY = "hostConnectionString";
     private static final String DATABASE_NAME_PROPERTY = "databaseName";
     private static final String USER_LOGIN_PROPERTY = "userLogin";
     private static final String USER_PASSWORD_PROPERTY = "userPassword";
-    private static final String NUMBER_OF_CONNECTIONS_PROPERTY  = "numberOfConnections";
+    private static final String NUMBER_OF_CONNECTIONS_PROPERTY = "numberOfConnections";
 
-    private String hostConnectionString;
-    private String databaseName;
-    private String userLogin;
-    private String userPassword;
 
-    private volatile boolean isAvailable = false;
+    private static final ConnectionPool instance = new ConnectionPool();
+    private BlockingQueue<Connection> availableConnections;
+    private BlockingQueue<Connection> usedConnections;
+    private static ReentrantLock lock = new ReentrantLock();
     private volatile boolean isInit = false;
 
-    private static ConnectionPool instance;
 
-    private List<Connection> availableConnections = new LinkedList<>();
-    private List<Connection> usedConnections = new LinkedList<>();
-
-    private final Lock lock = new ReentrantLock();
-    private final Condition atLeastOneFreeConnection = lock.newCondition();
-
-    private ConnectionPool(){
+    private ConnectionPool() {
     }
 
+    /**
+     * Creates a limit number of connections.
+     * @throws ConnectionPoolException if can`t initialize pool.
+     */
     public void init() throws ConnectionPoolException {
-        if(!isInit) {
-            ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE_NAME);
-            String driverClassName = resourceBundle.getString(DRIVER_CLASS_NAME_PROPERTY);
-            String hostConnectionString = resourceBundle.getString(HOST_CONNECTION_STRING_PROPERTY);
-            String databaseName = resourceBundle.getString(DATABASE_NAME_PROPERTY);
-            String userLogin = resourceBundle.getString(USER_LOGIN_PROPERTY);
-            String userPassword = resourceBundle.getString(USER_PASSWORD_PROPERTY);
-            String numberOfConnectionsString = resourceBundle.getString(NUMBER_OF_CONNECTIONS_PROPERTY);
-
-            this.hostConnectionString = hostConnectionString;
-            this.databaseName = databaseName;
-            this.userLogin = userLogin;
-            this.userPassword = userPassword;
-
-            try {
-                Class.forName(driverClassName);
-                for (int i = 0; i < Integer.parseInt(numberOfConnectionsString); i++) {
-                    Connection newConnection = DriverManager.getConnection(hostConnectionString + databaseName,
-                            userLogin, userPassword);
-
-                    lock.lock();
-                    availableConnections.add(newConnection);
-                    isAvailable = true;
-                    lock.unlock();
-                }
-                isInit = true;
-            } catch (ClassNotFoundException | SQLException e) {
-                throw new ConnectionPoolException("Cannot init a pool", e);
-            }
-        }
-        else {
-            throw new ConnectionPoolException("Try to init already init pool");
-        }
-    }
-
-    public void destroy() throws ConnectionPoolException {
-        if(isInit) {
+        try {
             lock.lock();
-            try {
-                for (Connection connection : availableConnections) {
-                    connection.close();
+            if (!isInit) {
+                ResourceBundle dbProperty = ResourceBundle.getBundle(DB_PROPERTY_RESOURCE_BUNDLE);
+                int poolSize = Integer.parseInt(dbProperty.getString(NUMBER_OF_CONNECTIONS_PROPERTY));
+                availableConnections = new ArrayBlockingQueue<>(poolSize);
+                usedConnections = new ArrayBlockingQueue<>(poolSize);
+
+                try {
+                    Class.forName(dbProperty.getString(DRIVER_CLASS_NAME_PROPERTY));
+                    for (int i = 0; i < poolSize; i++) {
+                        Connection connection = DriverManager.getConnection(
+                                dbProperty.getString(HOST_CONNECTION_STRING_PROPERTY) + dbProperty.getString(DATABASE_NAME_PROPERTY),
+                                dbProperty.getString(USER_LOGIN_PROPERTY),
+                                dbProperty.getString(USER_PASSWORD_PROPERTY)
+                        );
+
+                        connection.setAutoCommit(false);
+                        availableConnections.add(connection);
+                    }
+                    isInit = true;
+
+                    logger.info("Connection pool was successfully initialized");
+                } catch (ClassNotFoundException | SQLException e) {
+                    throw new ConnectionPoolException("Cannot init a pool", e);
                 }
-                availableConnections.clear();
-                for (Connection connection : usedConnections) {
-                    connection.close();
-                }
-                usedConnections.clear();
-                isAvailable = false;
-                isInit = false;
-            } catch (SQLException e) {
-                throw new ConnectionPoolException("Cannot destroy a pool", e);
-            } finally {
-                lock.unlock();
+            } else {
+                throw new ConnectionPoolException("Try to init already init pool");
             }
+        } finally {
+            lock.unlock();
         }
-        else {
-            throw new ConnectionPoolException("Try to destroy not init pool");
+    }
+
+    /**
+     * Closes all of the connections.
+     * @throws ConnectionPoolException if can`t destroy pool.
+     */
+    public void destroy() throws ConnectionPoolException {
+        try {
+            lock.lock();
+            if (isInit) {
+                lock.lock();
+                try {
+                    for (Connection connection : availableConnections) {
+                        connection.close();
+                    }
+                    availableConnections.clear();
+                    for (Connection connection : usedConnections) {
+                        connection.close();
+                    }
+                    usedConnections.clear();
+                    isInit = false;
+
+                    logger.info("Connection pool was successfully destroyed");
+                } catch (SQLException e) {
+                    throw new ConnectionPoolException("Cannot destroy a pool", e);
+                }
+            } else {
+                throw new ConnectionPoolException("Try to destroy not init pool");
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
 
-    public static ConnectionPool getInstance(){
-        if (instance == null){
-            instance = new ConnectionPool();
-            LOGGER.info("Connection pool was created");
-        }
+    /**
+     * Gives {@link ConnectionPool} instance.
+     * @return ConnectionPool instance.
+     */
+    public static ConnectionPool getInstance() {
         return instance;
     }
 
-    public Connection getConnection() throws InterruptedException, ConnectionPoolException {
-        if(isAvailable){
-            lock.lock();
-            try {
-                while (availableConnections.isEmpty()){
-                    atLeastOneFreeConnection.await();
-                }
-
-                Connection connection = availableConnections.remove(0);
-                usedConnections.add(connection);
-                return connection;
-            } finally {
-                lock.unlock();
-            }
-        }
-        else {
-            throw new ConnectionPoolException("Try to use pool when it is not available");
+    /**
+     * Gives a free connection
+     * @return connection
+     * @throws ConnectionPoolException if error while getting connection.
+     */
+    public Connection getConnection() throws ConnectionPoolException {
+        try {
+            Connection connection = availableConnections.take();
+            usedConnections.add(connection);
+            return connection;
+        } catch(InterruptedException e){
+            throw new ConnectionPoolException("Taking interrupted connection", e);
         }
     }
 
-    public void freeConnection(Connection connection) throws SQLException, ConnectionPoolException {
-        if(isAvailable){
-            lock.lock();
+    /**
+     * Retrieves connection to a {@link ConnectionPool}
+     * @param connection a connection object
+     * @throws ConnectionPoolException if can`t retrieve connection of connection was created outside thr Connection Pool
+     */
+    public void freeConnection(Connection connection) throws ConnectionPoolException {
+        if(usedConnections.contains(connection)){
             try {
-                if (usedConnections.isEmpty() || !usedConnections.contains(connection)) {
-                    throw new ConnectionPoolException("Try to free pool which was created not in Connection Pool");
-                }
                 usedConnections.remove(connection);
-
-                if (connection.isClosed()) {
-                    connection = DriverManager.getConnection(hostConnectionString + databaseName,
-                            userLogin, userPassword);
-
-                } else {
-                    if (!connection.getAutoCommit()) {
-                        connection.setAutoCommit(true);
-                    }
-                    if (connection.isReadOnly()) {
-                        connection.setReadOnly(false);
-                    }
-                }
-
-                availableConnections.add(connection);
-
-                atLeastOneFreeConnection.signal();
-            } finally {
-                lock.unlock();
+                availableConnections.put(connection);
+            } catch(InterruptedException e){
+                throw new ConnectionPoolException("Can't free connection", e);
             }
-        }
-        else {
-            throw new ConnectionPoolException("Try to use pool when it is not available");
+        } else {
+            throw new ConnectionPoolException("Try to close not a pool connection");
         }
     }
 

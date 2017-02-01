@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://hostel.com/bean"
+            xmlns:bean="http://hostel.com/bean"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:element name="beans">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="bean" type="bean:beanType" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="beanType">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="class" type="xsd:string" use="required"/>
+    </xsd:complexType>
+</xsd:schema>

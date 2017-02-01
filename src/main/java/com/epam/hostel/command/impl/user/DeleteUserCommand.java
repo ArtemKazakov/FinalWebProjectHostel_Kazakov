@@ -1,6 +1,7 @@
 package com.epam.hostel.command.impl.user;
 
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.service.UserService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.factory.ServiceFactory;
@@ -13,10 +14,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 06.01.2017.
+ * Services request from the deleting user form.
  */
 public class DeleteUserCommand implements Command{
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(DeleteUserCommand.class);
 
     private static final String REDIRECT_PAGE = "/Controller?command=viewUsersList";
     private static final String ERROR_PAGE = "/Controller?command=viewUser&clientId=";
@@ -42,21 +43,12 @@ public class DeleteUserCommand implements Command{
         }
 
         boolean userRole = (Boolean)session.getAttribute(USER_ROLE_SESSION_ATTRIBUTE);
-
         if(!userRole) {
             response.sendRedirect(MAIN_PAGE);
             return;
         }
 
-        String idStr = request.getParameter(CLIENT_ID_PARAM);
-        int id = -1;
-        if(idStr != null){
-            try{
-                id = Integer.parseInt(idStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong id for deleting user");
-            }
-        }
+        int id = CommandHelper.getInt(request.getParameter(CLIENT_ID_PARAM));
 
         try{
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
@@ -64,6 +56,7 @@ public class DeleteUserCommand implements Command{
             userService.deleteUser(id);
             response.sendRedirect(REDIRECT_PAGE);
         } catch (ServiceException e) {
+            logger.warn(e);
             response.sendRedirect(ERROR_PAGE+id+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
         }
     }

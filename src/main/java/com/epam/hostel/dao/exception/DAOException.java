@@ -1,5 +1,8 @@
 package com.epam.hostel.dao.exception;
 
+/**
+ * Exception that connected with DAO layer work.
+ */
 public class DAOException extends Exception {
 	private static final long serialVersionUID = 1L;
 

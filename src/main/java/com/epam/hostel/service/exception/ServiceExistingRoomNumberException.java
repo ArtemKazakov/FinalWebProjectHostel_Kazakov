@@ -1,7 +1,7 @@
 package com.epam.hostel.service.exception;
 
 /**
- * Created by ASUS on 07.01.2017.
+ * Exception which show that room number is invalid.
  */
 public class ServiceExistingRoomNumberException extends ServiceException {
     public ServiceExistingRoomNumberException(){

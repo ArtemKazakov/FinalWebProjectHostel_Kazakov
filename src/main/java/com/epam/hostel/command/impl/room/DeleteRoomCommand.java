@@ -1,6 +1,7 @@
 package com.epam.hostel.command.impl.room;
 
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.service.RoomService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.factory.ServiceFactory;
@@ -13,10 +14,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 08.01.2017.
+ * Services request from the deleting room form.
  */
 public class DeleteRoomCommand implements Command {
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(DeleteRoomCommand.class);
 
     private static final String REDIRECT_PAGE = "/Controller?command=viewRoomsList";
     private static final String MAIN_PAGE = "/Controller?command=mainPage";
@@ -40,15 +41,7 @@ public class DeleteRoomCommand implements Command {
             return;
         }
 
-        String numberStr = request.getParameter(DELETE_ROOM_FORM_NUMBER_PARAM);
-        int number = -1;
-        if(numberStr != null){
-            try{
-                number = Integer.parseInt(numberStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong number for adding room");
-            }
-        }
+        int number = CommandHelper.getInt(request.getParameter(DELETE_ROOM_FORM_NUMBER_PARAM));
 
         try{
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
@@ -56,6 +49,7 @@ public class DeleteRoomCommand implements Command {
             roomService.deleteRoom(number);
             response.sendRedirect(REDIRECT_PAGE+AMP+DELETE_ROOM_SUCCESS_REQUEST_ATTR+EQ+true);
         }  catch (ServiceException e) {
+            logger.warn(e);
             response.sendRedirect(REDIRECT_PAGE+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
         }
 

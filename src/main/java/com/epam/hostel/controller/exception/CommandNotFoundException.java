@@ -1,7 +1,7 @@
 package com.epam.hostel.controller.exception;
 
 /**
- * Created by ASUS on 02.11.2016.
+ * Exception connected with wrong command.
  */
 public class CommandNotFoundException extends Exception {
     private static final long serialVersionUID = 1L;

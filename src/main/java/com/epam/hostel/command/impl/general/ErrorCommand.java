@@ -9,10 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 02.11.2016.
+ * Services the request to show an 404 error page.
  */
 public class ErrorCommand implements Command {
-    private static final String JSP_PAGE_PATH = "WEB-INF/jsp/error.jsp";
+    private static final String JSP_PAGE_PATH = "WEB-INF/jsp/error404.jsp";
 
     private static final String SELECTED_LANGUAGE_REQUEST_ATTR = "selectedLanguage";
 

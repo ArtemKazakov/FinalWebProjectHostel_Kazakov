@@ -1,6 +1,7 @@
 package com.epam.hostel.command.impl.discount;
 
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.service.DiscountService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.factory.ServiceFactory;
@@ -13,10 +14,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 06.01.2017.
+ * Services request from the editing discount form.
  */
 public class EditDiscountCommand implements Command {
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(EditDiscountCommand.class);
 
     private static final String REDIRECT_PAGE = "/Controller?command=viewUser";
     private static final String MAIN_PAGE = "/Controller?command=mainPage";
@@ -42,35 +43,9 @@ public class EditDiscountCommand implements Command {
             return;
         }
 
-        String idDiscountStr = request.getParameter(DISCOUNT_ID_PARAM);
-        int idDiscount = -1;
-        if(idDiscountStr != null){
-            try{
-                idDiscount = Integer.parseInt(idDiscountStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong discount id for editing discount");
-            }
-        }
-
-        String idClientStr = request.getParameter(CLIENT_ID_PARAM);
-        int idClient = -1;
-        if(idDiscountStr != null){
-            try{
-                idClient = Integer.parseInt(idClientStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong client id for editing discount");
-            }
-        }
-
-        String valueStr = request.getParameter(DISCOUNT_VALUE_PARAM);
-        int value = -1;
-        if(idDiscountStr != null){
-            try{
-                value = Integer.parseInt(valueStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong client id for editing discount");
-            }
-        }
+        int idDiscount = CommandHelper.getInt(request.getParameter(DISCOUNT_ID_PARAM));
+        int idClient = CommandHelper.getInt(request.getParameter(CLIENT_ID_PARAM));
+        int value = CommandHelper.getInt(request.getParameter(DISCOUNT_VALUE_PARAM));
 
         try{
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
@@ -78,6 +53,7 @@ public class EditDiscountCommand implements Command {
             discountService.updateDiscount(idDiscount, idClient, value);
             response.sendRedirect(REDIRECT_PAGE+AMP+CLIENT_ID_ATTRIBUTE+EQ+idClient);
         } catch (ServiceException e) {
+            logger.warn(e);
             response.sendRedirect(REDIRECT_PAGE+AMP+CLIENT_ID_ATTRIBUTE+EQ+idClient+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
         }
 

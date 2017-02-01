@@ -1,5 +1,7 @@
 package com.epam.hostel.bean.entity;
 
+import java.util.Arrays;
+
 /**
  * Created by ASUS on 27.10.2016.
  */
@@ -7,7 +9,7 @@ public class User {
 
     private int id;
     private String login;
-    private String password;
+    private byte[] password;
     private boolean banned;
     private int visitsNumber;
     private Passport passport;
@@ -29,11 +31,11 @@ public class User {
         this.login = login;
     }
 
-    public String getPassword() {
+    public byte[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(byte[] password) {
         this.password = password;
     }
 
@@ -81,17 +83,16 @@ public class User {
         if (visitsNumber != user.visitsNumber) return false;
         if (admin != user.admin) return false;
         if (login != null ? !login.equals(user.login) : user.login != null) return false;
-        if (password != null ? !password.equals(user.password) : user.password != null) return false;
-        if (passport != null ? !passport.equals(user.passport) : user.passport != null) return false;
+        if (!Arrays.equals(password, user.password)) return false;
+        return passport != null ? passport.equals(user.passport) : user.passport == null;
 
-        return true;
     }
 
     @Override
     public int hashCode() {
         int result = id;
         result = 31 * result + (login != null ? login.hashCode() : 0);
-        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + Arrays.hashCode(password);
         result = 31 * result + (banned ? 1 : 0);
         result = 31 * result + visitsNumber;
         result = 31 * result + (passport != null ? passport.hashCode() : 0);
@@ -104,7 +105,7 @@ public class User {
         return "User{" +
                 "id=" + id +
                 ", login='" + login + '\'' +
-                ", password='" + password + '\'' +
+                ", password=" + "hidden" +
                 ", banned=" + banned +
                 ", visitsNumber=" + visitsNumber +
                 ", passport=" + passport +

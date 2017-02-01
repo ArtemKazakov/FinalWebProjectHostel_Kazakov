@@ -7,6 +7,7 @@ import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.UserService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.factory.ServiceFactory;
+import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,9 +17,10 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Created by ASUS on 16.11.2016.
+ * Services request to the users list page.
  */
-public class ViewUsersListCommand implements Command{
+public class ViewUsersListCommand implements Command {
+    private final static Logger logger = Logger.getLogger(ViewUsersListCommand.class);
 
     private static final String JSP_PAGE_PATH = "WEB-INF/jsp/users.jsp";
     private static final String SESSION_TIMEOUT_PAGE = "/Controller?command=mainPage";
@@ -34,7 +36,7 @@ public class ViewUsersListCommand implements Command{
 
         HttpSession session = request.getSession(false);
         boolean userRole = (session == null) ? false : (Boolean) session.getAttribute(USER_ROLE_SESSION_ATTRIBUTE);
-        if(!userRole) {
+        if (!userRole) {
             response.sendRedirect(SESSION_TIMEOUT_PAGE);
             return;
         }
@@ -48,7 +50,8 @@ public class ViewUsersListCommand implements Command{
             UserService userService = serviceFactory.getUserService();
             List<User> users = userService.getAllUsers();
             request.setAttribute(USERS_REQUEST_ATTR, users);
-        } catch (ServiceException e){
+        } catch (ServiceException e) {
+            logger.warn(e);
             request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);
         }
         request.getRequestDispatcher(JSP_PAGE_PATH).forward(request, response);

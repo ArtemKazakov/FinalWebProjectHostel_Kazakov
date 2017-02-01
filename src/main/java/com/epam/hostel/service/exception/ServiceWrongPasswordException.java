@@ -2,7 +2,7 @@ package com.epam.hostel.service.exception;
 
 
 /**
- * Created by ASUS on 29.10.2016.
+ * Exception which show that password is invalid.
  */
 public class ServiceWrongPasswordException extends ServiceException {
     public ServiceWrongPasswordException(){

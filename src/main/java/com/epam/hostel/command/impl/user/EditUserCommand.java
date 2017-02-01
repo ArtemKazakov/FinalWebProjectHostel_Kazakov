@@ -1,6 +1,9 @@
 package com.epam.hostel.command.impl.user;
 
+import com.epam.hostel.bean.entity.Passport;
+import com.epam.hostel.bean.entity.User;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.service.UserService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.exception.ServiceWrongLoginException;
@@ -13,16 +16,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by ASUS on 10.11.2016.
+ * Services request from the editing user form.
  */
 public class EditUserCommand implements Command {
 
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(EditUserCommand.class);
 
     private static final String REDIRECT_PAGE = "/Controller?command=userAccount&userId=";
     private static final String REDIRECT_ADMIN_PAGE = "/Controller?command=viewUser&clientId=";
@@ -53,78 +57,83 @@ public class EditUserCommand implements Command {
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String idStr = request.getParameter(USER_ID_PARAM);
-        int id = -1;
-        if(idStr != null){
-            try{
-                id = Integer.parseInt(idStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong id for editing user");
-            }
-        }
+
+        int id = CommandHelper.getInt(request.getParameter(USER_ID_PARAM));
 
         HttpSession session = request.getSession(false);
-        if(session == null) {
+        if (session == null) {
             response.sendRedirect(MAIN_PAGE);
             return;
         }
 
-        boolean userRole = (Boolean)session.getAttribute(USER_ROLE_SESSION_ATTRIBUTE);
-        int userId = (Integer)session.getAttribute(USER_ID_SESSION_ATTRIBUTE);
+        boolean userRole = (Boolean) session.getAttribute(USER_ROLE_SESSION_ATTRIBUTE);
+        int userId = (Integer) session.getAttribute(USER_ID_SESSION_ATTRIBUTE);
 
-        if(!userRole && (userId != id)){
+        if (!userRole && (userId != id)) {
             response.sendRedirect(MAIN_PAGE);
             return;
         }
 
-        String editFormLogin = request.getParameter(EDIT_FORM_LOGIN_PARAM);
-        String editFormPassword = request.getParameter(EDIT_FORM_PASSWORD_PARAM);
-        String editFormIdentificationNumberString = request.getParameter(EDIT_FORM_IDENTIFICATION_NUMBER_PARAM);
-        int editFormIdentificationNumber = -1;
-        if(editFormIdentificationNumberString != null){
-            try{
-                editFormIdentificationNumber = Integer.parseInt(editFormIdentificationNumberString);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong passport id for find suitable rooms");
-            }
-        }
-        String editFormSeries = request.getParameter(EDIT_FORM_SERIES_PARAM);
-        String editFormSurname = request.getParameter(EDIT_FORM_SURNAME_PARAM);
-        String editFormName = request.getParameter(EDIT_FORM_NAME_PARAM);
-        String editFormPatronymic = request.getParameter(EDIT_FORM_PATRONYMIC_PARAM);
-        String editFormBirthdayDateString = request.getParameter(EDIT_FORM_BIRTHDAY_DATE_PARAM);
+        String login = request.getParameter(EDIT_FORM_LOGIN_PARAM);
+        byte[] password = request.getParameter(EDIT_FORM_PASSWORD_PARAM).getBytes(StandardCharsets.UTF_8);
+        int identificationNumber = CommandHelper.getInt(request.getParameter(EDIT_FORM_IDENTIFICATION_NUMBER_PARAM));
+        String series = request.getParameter(EDIT_FORM_SERIES_PARAM);
+        String surname = request.getParameter(EDIT_FORM_SURNAME_PARAM);
+        String name = request.getParameter(EDIT_FORM_NAME_PARAM);
+        String patronymic = request.getParameter(EDIT_FORM_PATRONYMIC_PARAM);
         SimpleDateFormat format = new SimpleDateFormat(BIRTHDAY_DATE_FORMAT);
-        Date editFormBirthdayDate = null;
-        if (editFormBirthdayDateString != null) {
+        Date birthdayDate = null;
+        if (request.getParameter(EDIT_FORM_BIRTHDAY_DATE_PARAM) != null) {
             try {
-                editFormBirthdayDate = format.parse(request.getParameter(EDIT_FORM_BIRTHDAY_DATE_PARAM));
+                birthdayDate = format.parse(request.getParameter(EDIT_FORM_BIRTHDAY_DATE_PARAM));
             } catch (ParseException | NullPointerException e) {
-                LOGGER.error("Wrong birthday date for editing user");
+                logger.error("Wrong birthday date for editing user");
+                response.sendRedirect(MAIN_PAGE);
+                return;
             }
         }
 
-        String redirectPage = null;
-        redirectPage = userRole ? REDIRECT_ADMIN_PAGE : REDIRECT_PAGE;
+        String redirectPage = userRole ? REDIRECT_ADMIN_PAGE : REDIRECT_PAGE;
 
-        if (editFormLogin != null && editFormPassword != null &&
-                editFormSeries != null && editFormSurname != null && editFormName != null &&
-                editFormPatronymic != null) {
-
-            try {
-                ServiceFactory serviceFactory = ServiceFactory.getInstance();
-                UserService userService = serviceFactory.getUserService();
-                userService.updateUser(id, editFormLogin, editFormPassword, editFormIdentificationNumber,
-                        editFormSeries, editFormSurname, editFormName, editFormPatronymic,
-                        editFormBirthdayDate);
-                response.sendRedirect(redirectPage + id + AMP + EDIT_SUCCESS_REQUEST_ATTR + EQ + true);
-            } catch (ServiceWrongLoginException e){
-                response.sendRedirect(redirectPage+id+AMP+WRONG_LOGIN_REQUEST_ATTR+EQ+true);
-            } catch (ServiceWrongPasswordException e){
-                response.sendRedirect(redirectPage+id+AMP+WRONG_PASSWORD_REQUEST_ATTR+EQ+true);
-            } catch (ServiceException e){
-                response.sendRedirect(redirectPage+id+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
-            }
+        try {
+            ServiceFactory serviceFactory = ServiceFactory.getInstance();
+            UserService userService = serviceFactory.getUserService();
+            userService.updateUser(createUser(id, login, password),
+                    createPassport(identificationNumber,
+                            series, surname, name, patronymic,
+                            birthdayDate));
+            response.sendRedirect(redirectPage + id + AMP + EDIT_SUCCESS_REQUEST_ATTR + EQ + true);
+        } catch (ServiceWrongLoginException e) {
+            logger.warn(e);
+            response.sendRedirect(redirectPage + id + AMP + WRONG_LOGIN_REQUEST_ATTR + EQ + true);
+        } catch (ServiceWrongPasswordException e) {
+            logger.warn(e);
+            response.sendRedirect(redirectPage + id + AMP + WRONG_PASSWORD_REQUEST_ATTR + EQ + true);
+        } catch (ServiceException e) {
+            logger.warn(e);
+            response.sendRedirect(redirectPage + id + AMP + SERVICE_ERROR_REQUEST_ATTR + EQ + true);
         }
+
+    }
+
+    private User createUser(int id, String login, byte[] password) {
+        User user = new User();
+        user.setId(id);
+        user.setLogin(login);
+        user.setPassword(password);
+        return user;
+    }
+
+    private Passport createPassport(int identificationNumber, String series,
+                                    String surname, String name, String patronymic, Date birthday) {
+        Passport passport = new Passport();
+        passport.setIdentificationNumber(identificationNumber);
+        passport.setSeries(series);
+        passport.setSurname(surname);
+        passport.setName(name);
+        passport.setPatronymic(patronymic);
+        passport.setBirthday(birthday);
+        return passport;
     }
 
 }

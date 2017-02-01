@@ -2,7 +2,7 @@ package com.epam.hostel.service.exception;
 
 
 /**
- * Created by ASUS on 29.10.2016.
+ * Exception which show that login is invalid.
  */
 public class ServiceWrongLoginException extends ServiceException {
     public ServiceWrongLoginException(){

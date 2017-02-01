@@ -1,7 +1,9 @@
-package com.epam.hostel.dao.connectionmanager;
+package com.epam.hostel.dao.exception;
+
+import com.epam.hostel.dao.connectionmanager.ConnectionPool;
 
 /**
- * Created by ASUS on 01.11.2016.
+ * Exception that connected with work of {@link ConnectionPool}.
  */
 public class ConnectionPoolException extends Exception {
     private static final long serialVersionUID = 1L;

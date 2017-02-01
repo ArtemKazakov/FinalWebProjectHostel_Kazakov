@@ -1,6 +1,7 @@
 package com.epam.hostel.command.impl.discount;
 
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.service.DiscountService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.factory.ServiceFactory;
@@ -13,10 +14,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 18.11.2016.
+ * Services request from the adding discount form.
  */
 public class AddDiscountCommand implements Command {
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(AddDiscountCommand.class);
 
     private static final String REDIRECT_PAGE = "/Controller?command=viewUser";
     private static final String MAIN_PAGE = "/Controller?command=mainPage";
@@ -43,38 +44,22 @@ public class AddDiscountCommand implements Command {
         }
 
         int administratorId = (session == null) ? -1 : (Integer) session.getAttribute(USER_ID_SESSION_ATTRIBUTE);;
-
         if(administratorId == -1){
             response.sendRedirect(MAIN_PAGE);
             return;
         }
 
-        String discountFormClientIdString = request.getParameter(DISCOUNT_FORM_CLIENT_ID_PARAM);
-        int discountFormClientId = -1;
-        if(discountFormClientIdString != null){
-            try{
-                discountFormClientId = Integer.parseInt(discountFormClientIdString);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong client id for adding discount");
-            }
-        }
-        String discountFormValueString = request.getParameter(DISCOUNT_FORM_VALUE_PARAM);
-        int discountFormValue = -1;
-        if(discountFormClientIdString != null){
-            try{
-                discountFormValue = Integer.parseInt(discountFormValueString);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong discount value for adding discount");
-            }
-        }
+        int clientId = CommandHelper.getInt(request.getParameter(DISCOUNT_FORM_CLIENT_ID_PARAM));
+        int value = CommandHelper.getInt(request.getParameter(DISCOUNT_FORM_VALUE_PARAM));
 
         try{
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
             DiscountService discountService = serviceFactory.getDiscountService();
-            discountService.addDiscount(discountFormClientId, discountFormValue, administratorId);
-            response.sendRedirect(REDIRECT_PAGE+AMP+CLIENT_ID_ATTRIBUTE+EQ+discountFormClientId);
+            discountService.addDiscount(clientId, value, administratorId);
+            response.sendRedirect(REDIRECT_PAGE+AMP+CLIENT_ID_ATTRIBUTE+EQ+clientId);
         } catch (ServiceException e) {
-            response.sendRedirect(REDIRECT_PAGE+AMP+CLIENT_ID_ATTRIBUTE+EQ+discountFormClientId+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
+            logger.warn(e);
+            response.sendRedirect(REDIRECT_PAGE+AMP+CLIENT_ID_ATTRIBUTE+EQ+clientId+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
         }
 
     }

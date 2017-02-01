@@ -1,6 +1,7 @@
 package com.epam.hostel.command.impl.room;
 
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.service.RoomService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.exception.ServiceExistingRoomNumberException;
@@ -14,10 +15,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 07.01.2017.
+ * Services request from the adding room form.
  */
 public class AddRoomCommand implements Command {
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(AddRoomCommand.class);
 
     private static final String REDIRECT_PAGE = "/Controller?command=viewRoomsList";
     private static final String MAIN_PAGE = "/Controller?command=mainPage";
@@ -44,35 +45,9 @@ public class AddRoomCommand implements Command {
             return;
         }
 
-        String numberStr = request.getParameter(ADD_ROOM_FORM_NUMBER_PARAM);
-        int number = -1;
-        if(numberStr != null){
-            try{
-                number = Integer.parseInt(numberStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong number for adding room");
-            }
-        }
-
-        String seatsNumberStr = request.getParameter(ADD_ROOM_FORM_SEATS_NUMBER_PARAM);
-        int seatsNumber = -1;
-        if(seatsNumberStr != null){
-            try{
-                seatsNumber = Integer.parseInt(seatsNumberStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong seats number for adding room");
-            }
-        }
-
-        String perdayCostStr = request.getParameter(ADD_ROOM_FORM_PERDAY_COST_PARAM);
-        int perdayCost = -1;
-        if(perdayCostStr != null){
-            try{
-                perdayCost = Integer.parseInt(perdayCostStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong perday cost for adding room");
-            }
-        }
+        int number = CommandHelper.getInt(request.getParameter(ADD_ROOM_FORM_NUMBER_PARAM));
+        int seatsNumber = CommandHelper.getInt(request.getParameter(ADD_ROOM_FORM_SEATS_NUMBER_PARAM));
+        int perdayCost = CommandHelper.getInt(request.getParameter(ADD_ROOM_FORM_PERDAY_COST_PARAM));
 
         try{
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
@@ -80,8 +55,10 @@ public class AddRoomCommand implements Command {
             roomService.addRoom(number, seatsNumber, perdayCost);
             response.sendRedirect(REDIRECT_PAGE+AMP+ADD_ROOM_SUCCESS_REQUEST_ATTR+EQ+true);
         } catch (ServiceExistingRoomNumberException e) {
+            logger.warn(e);
             response.sendRedirect(REDIRECT_PAGE+AMP+EXISTING_ROOM_ERROR_REQUEST_ATTR+EQ+true);
         } catch (ServiceException e) {
+            logger.warn(e);
             response.sendRedirect(REDIRECT_PAGE+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
         }
 

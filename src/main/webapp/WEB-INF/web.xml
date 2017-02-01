@@ -15,28 +15,52 @@
         <servlet-class>com.epam.hostel.controller.Controller</servlet-class>
     </servlet>
 
+    <listener>
+        <listener-class>com.epam.hostel.controller.listener.FactoryInitializeListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>com.epam.hostel.controller.listener.ConnectionPoolListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>com.epam.hostel.controller.listener.SessionListener</listener-class>
+    </listener>
+
     <servlet-mapping>
         <servlet-name>Controller</servlet-name>
         <url-pattern>/Controller</url-pattern>
     </servlet-mapping>
 
     <filter>
-        <display-name>CharsetFilter</display-name>
         <filter-name>CharsetFilter</filter-name>
         <filter-class>com.epam.hostel.controller.filter.CharsetFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
     </filter>
-
     <filter-mapping>
         <filter-name>CharsetFilter</filter-name>
-        <url-pattern>/Controller</url-pattern>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <listener>
-        <listener-class>com.epam.hostel.controller.listener.ConnectionPoolListener</listener-class>
-    </listener>
+    <filter>
+        <filter-name>CommandFilter</filter-name>
+        <filter-class>com.epam.hostel.controller.filter.CommandFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CommandFilter</filter-name>
+        <url-pattern>/Controller</url-pattern>
+    </filter-mapping>
 
     <error-page>
         <error-code>404</error-code>
         <location>/Controller?command=error</location>
+    </error-page>
+
+    <error-page>
+        <error-code>500</error-code>
+        <location>/Controller?command=serverError</location>
     </error-page>
 </web-app>

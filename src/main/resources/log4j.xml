@@ -4,7 +4,7 @@
 
     <appender name="infoLog" class="org.apache.log4j.RollingFileAppender">
         <param name="append" value="true" />
-        <param name="maxFileSize" value="20KB" />
+        <param name="maxFileSize" value="200KB" />
         <param name="maxBackupIndex" value="5" />
         <param name="file" value="logs/infoLog.log" />
         <layout class="org.apache.log4j.PatternLayout">
@@ -19,7 +19,7 @@
 
     <appender name="warningLog" class="org.apache.log4j.RollingFileAppender">
         <param name="append" value="true" />
-        <param name="maxFileSize" value="10KB" />
+        <param name="maxFileSize" value="900KB" />
         <param name="maxBackupIndex" value="5" />
         <param name="file" value="logs/warnLog.log" />
         <layout class="org.apache.log4j.PatternLayout">
@@ -35,7 +35,7 @@
     <appender name="errorLog" class="org.apache.log4j.RollingFileAppender">
         <param name="Threshold" value="ERROR" />
         <param name="append" value="true" />
-        <param name="maxFileSize" value="20KB" />
+        <param name="maxFileSize" value="200KB" />
         <param name="maxBackupIndex" value="5" />
         <param name="file" value="logs/errorLog.log" />
         <layout class="org.apache.log4j.PatternLayout">

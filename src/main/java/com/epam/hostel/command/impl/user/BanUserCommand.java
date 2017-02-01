@@ -1,6 +1,7 @@
 package com.epam.hostel.command.impl.user;
 
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.service.UserService;
 import com.epam.hostel.service.exception.ServiceException;
 import com.epam.hostel.service.factory.ServiceFactory;
@@ -13,11 +14,11 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by ASUS on 04.01.2017.
+ * Services request from the editing user ban status room form.
  */
 public class BanUserCommand implements Command {
 
-    private final static Logger LOGGER = Logger.getRootLogger();
+    private final static Logger logger = Logger.getLogger(BanUserCommand.class);
 
     private static final String REDIRECT_PAGE = "/Controller?command=viewUser&clientId=";
     private static final String MAIN_PAGE = "/Controller?command=mainPage";
@@ -42,37 +43,20 @@ public class BanUserCommand implements Command {
         }
 
         boolean userRole = (Boolean)session.getAttribute(USER_ROLE_SESSION_ATTRIBUTE);
-
         if(!userRole) {
             response.sendRedirect(MAIN_PAGE);
             return;
         }
 
-        String idStr = request.getParameter(CLIENT_ID_PARAM);
-        int id = -1;
-        if(idStr != null){
-            try{
-                id = Integer.parseInt(idStr);
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong id for editing user");
-            }
-        }
+        int id = CommandHelper.getInt(request.getParameter(CLIENT_ID_PARAM));
 
-        String banStatus = request.getParameter(BAN_STATUS_PARAM);
-        boolean banned = false;
-        if (banStatus != null){
-            try{
-                if (Integer.parseInt(banStatus) == 1){
-                    banned = true;
-                } else {
-                    if (Integer.parseInt(banStatus) != 0) {
-                        response.sendRedirect(MAIN_PAGE);
-                        return;
-                    }
-                }
-            } catch (NumberFormatException e){
-                LOGGER.error("Wrong id for editing user");
-            }
+        boolean banned;
+        int bannedNumber = CommandHelper.getInt(request.getParameter(BAN_STATUS_PARAM));
+        if (bannedNumber == 1 || bannedNumber == 0){
+            banned = Boolean.valueOf(request.getParameter(BAN_STATUS_PARAM));
+        } else {
+            response.sendRedirect(MAIN_PAGE);
+            return;
         }
 
         try{
@@ -81,6 +65,7 @@ public class BanUserCommand implements Command {
             userService.banUser(id, banned);
             response.sendRedirect(REDIRECT_PAGE+id);
         } catch (ServiceException e) {
+            logger.warn(e);
             response.sendRedirect(REDIRECT_PAGE+id+AMP+SERVICE_ERROR_REQUEST_ATTR+EQ+true);
         }
     }
