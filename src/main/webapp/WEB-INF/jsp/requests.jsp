@@ -33,6 +33,10 @@
 <f:message bundle="${local}" key="local.deleteButton" var="deleteButton"/>
 <f:message bundle="${local}" key="local.acceptButton" var="acceptButton"/>
 <f:message bundle="${local}" key="local.rejectButton" var="rejectButton"/>
+<f:message bundle="${local}" key="local.next" var="next"/>
+<f:message bundle="${local}" key="local.last" var="last"/>
+<f:message bundle="${local}" key="local.first" var="first"/>
+<f:message bundle="${local}" key="local.prev" var="prev"/>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -40,7 +44,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${siteName}</title>
+    <title>${siteName} - ${requests}</title>
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/img/hostel_icon.png" type="image/png">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
@@ -56,7 +60,7 @@
             <a href="${pageContext.request.contextPath}/Controller?command=userAccount">${personalInformation}</a>
         </li>
         <li><a href="${pageContext.request.contextPath}/Controller?command=viewUsersList">${clients}</a></li>
-        <li class="active"><a href="Controller?command=viewRequestsList">${requests}</a></li>
+        <li class="active"><a href="${pageContext.request.contextPath}/Controller?command=viewRequestsList">${requests}</a></li>
         <li><a href="${pageContext.request.contextPath}/Controller?command=viewScheduleRecords">${schedule}</a></li>
     </ul>
 
@@ -81,7 +85,7 @@
             <th>${payment}</th>
             <th>${requestStatus}</th>
         </tr>
-        <c:forEach var="rentalRequest" items="${requestScope.requestsList}">
+        <c:forEach var="rentalRequest" items="${requestScope.requestsList.content}">
             <tr>
                 <td>
                     <div class="btn-group">
@@ -111,7 +115,30 @@
             </tr>
         </c:forEach>
     </table>
-
+    <div class="ta_center">
+        <div class="btn-group">
+            <c:if test="${requestScope.requestsList.currentPage != 1}">
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRequestsList&page=1"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-fast-backward"></span> ${first}
+                </a>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRequestsList&page=${requestScope.requestsList.currentPage - 1}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-chevron-left"></span> ${prev}
+                </a>
+            </c:if>
+            <c:if test="${requestScope.requestsList.lastPage > requestScope.requestsList.currentPage}">
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRequestsList&page=${requestScope.requestsList.currentPage +1}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-chevron-right"></span> ${next}
+                </a>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRequestsList&page=${requestScope.requestsList.lastPage}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon glyphicon-fast-forward"></span> ${last}
+                </a>
+            </c:if>
+        </div>
+    </div>
     <hr>
 
 </div>

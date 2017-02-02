@@ -77,8 +77,7 @@ public class SiteServiceImpl extends Service implements SiteService {
         if (!Validator.validatePassword(user.getPassword())) {
             throw new ServiceWrongPasswordException("Wrong password");
         }
-        if (!Validator.validateInt(passport.getId()) ||
-                !Validator.validatePassportIdNumber(passport.getIdentificationNumber()) ||
+        if (!Validator.validatePassportIdNumber(passport.getIdentificationNumber()) ||
                 !Validator.validatePassportSeries(passport.getSeries()) ||
                 !Validator.validateName(passport.getSurname()) ||
                 !Validator.validateName(passport.getName()) ||

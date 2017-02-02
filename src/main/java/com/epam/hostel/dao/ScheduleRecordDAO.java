@@ -67,6 +67,17 @@ public interface ScheduleRecordDAO {
     List<ScheduleRecord> findAll() throws DAOException;
 
     /**
+     * Gives a list of all schedule records from a data source.
+     *
+     * @param start a number from which entries will be returned
+     * @param amount of entries
+     * @return a {@link List} of schedule records
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    List<ScheduleRecord> findAllLimited(int start, int amount) throws DAOException;
+
+    /**
      * Gives a list of schedule records from a data source by check in date and check out date.
      *
      * @param checkInDate  a check in date in finding record
@@ -76,5 +87,14 @@ public interface ScheduleRecordDAO {
      *                      a data source or a connection with it
      */
     List<ScheduleRecord> findByDateInterval(Date checkInDate, Date checkOutDate) throws DAOException;
+
+    /**
+     * Gives number of schedule records in a data source.
+     *
+     * @return count of schedule records
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    int selectScheduleRecordCount() throws DAOException;
 
 }

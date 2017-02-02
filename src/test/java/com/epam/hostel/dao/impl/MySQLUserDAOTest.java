@@ -20,16 +20,15 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by ASUS on 29.01.2017.
- */
 public class MySQLUserDAOTest {
+    private static final String DAO_CONFIGURATION = "/bean/daobeans.xml";
 
     private static UserDAO dao;
     private static TransactionManager transactionManager = TransactionManagerImpl.getInstance();
 
     @BeforeClass
     public static void init() {
+        DAOFactory.getInstance().inject(DAO_CONFIGURATION);
         dao = DAOFactory.getInstance().getUserDAO();
         try {
             DAOFactory.getInstance().getPoolDAO().init();
@@ -64,7 +63,7 @@ public class MySQLUserDAOTest {
 
                 dao.insert(expectedUser);
 
-                List<User> users = dao.findAll();
+                List<User> users = dao.findAll(0, 1000);
                 User actualUser = users.get(users.size() - 1);
 
                 dao.delete(actualUser.getId());
@@ -107,7 +106,7 @@ public class MySQLUserDAOTest {
 
                 dao.insert(user);
 
-                List<User> users = dao.findAll();
+                List<User> users = dao.findAll(0, 1000);
                 User insertedUser = users.get(users.size() - 1);
 
                 insertedUser.setLogin("testlogin2");
@@ -118,7 +117,7 @@ public class MySQLUserDAOTest {
                 insertedUser = dao.findByIdAndRole(insertedUser.getId(), false);
 
                 Assert.assertEquals(insertedUser.getLogin(), "testlogin2");
-                Assert.assertEquals(insertedUser.getPassword(), "testpassword2".getBytes());
+                Assert.assertEquals(Base64.encode(insertedUser.getPassword()), Base64.encode("testpassword2".getBytes()));
 
                 dao.delete(insertedUser.getId());
                 passportDAO.delete(id);
@@ -157,7 +156,7 @@ public class MySQLUserDAOTest {
 
                 dao.insert(user);
 
-                List<User> users = dao.findAll();
+                List<User> users = dao.findAll(0, 1000);
                 User insertedUser = users.get(users.size() - 1);
 
                 insertedUser.setBanned(true);
@@ -204,7 +203,7 @@ public class MySQLUserDAOTest {
     @Test
     public void testFindAll() throws Exception {
         try {
-            List<User> list = transactionManager.doInTransaction(dao :: findAll);
+            List<User> list = transactionManager.doInTransaction(() -> dao.findAll(0, 1000));
             assertNotNull(list);
             assertTrue(list.size() > 0);
         } catch(DAOException e){

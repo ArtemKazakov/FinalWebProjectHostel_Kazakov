@@ -70,10 +70,21 @@ public interface UserDAO {
     /**
      * Gives a list of all users from a data source.
      *
+     * @param start  a number from which entries will be returned
+     * @param amount of entries
      * @return a {@link List} of users
      * @throws DAOException in case of some exception with
      *                      a data source or a connection with it
      */
-    List<User> findAll() throws DAOException;
+    List<User> findAll(int start, int amount) throws DAOException;
+
+    /**
+     * Gives number of users in a data source.
+     *
+     * @return count of users
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    int selectUserCount() throws DAOException;
 
 }

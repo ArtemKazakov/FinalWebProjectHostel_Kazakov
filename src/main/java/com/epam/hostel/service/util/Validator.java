@@ -47,6 +47,14 @@ public class Validator {
     }
 
     /**
+     * Checks {@link int} for more or equal than zero.
+     *
+     * @param value a {@link int} value
+     * @return {@code true} if value is  more or equal than 0 and {@code false} otherwise
+     */
+    public static boolean validateStart(int value) { return value >= 0;}
+
+    /**
      * Checks string for null value and length.
      *
      * @param value a given string

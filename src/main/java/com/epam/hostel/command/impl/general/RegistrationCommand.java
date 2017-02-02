@@ -99,6 +99,17 @@ public class RegistrationCommand implements Command {
 
     }
 
+    /**
+     * Creates a {@link Passport} object.
+     *
+     * @param identificationNumber an identification number
+     * @param series               a series
+     * @param surname              a surname
+     * @param name                 a name
+     * @param patronymic           a patronymic
+     * @param birthday             a birthday
+     * @return a new passport
+     */
     private Passport createPassport(int identificationNumber, String series, String surname, String name,
                                     String patronymic, Date birthday) {
         Passport passport = new Passport();
@@ -111,6 +122,13 @@ public class RegistrationCommand implements Command {
         return passport;
     }
 
+    /**
+     * Creates a {@link User} object.
+     *
+     * @param login    a login
+     * @param password a password
+     * @return a new user
+     */
     private User createUser(String login, byte[] password) {
         User user = new User();
         user.setLogin(login);
@@ -118,6 +136,19 @@ public class RegistrationCommand implements Command {
         return user;
     }
 
+    /**
+     * Makes error redirect string.
+     *
+     * @param errorName            an error name
+     * @param login                s login
+     * @param identificationNumber an identification number
+     * @param series               a series
+     * @param surname              a surname
+     * @param name                 a name
+     * @param patronymic           a patronymic
+     * @param birthday             a birthday
+     * @return a redirect string
+     */
     private String makeErrorRedirectString(String errorName, String login, int identificationNumber,
                                            String series, String surname, String name, String patronymic, Date birthday) {
         StringBuilder parameters = new StringBuilder();

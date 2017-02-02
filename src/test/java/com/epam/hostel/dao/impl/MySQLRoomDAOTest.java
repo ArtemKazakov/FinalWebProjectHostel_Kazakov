@@ -17,12 +17,14 @@ import java.util.Optional;
 import static org.junit.Assert.*;
 
 public class MySQLRoomDAOTest {
+    private static final String DAO_CONFIGURATION = "/bean/daobeans.xml";
 
     private static RoomDAO dao;
     private static TransactionManager transactionManager = TransactionManagerImpl.getInstance();
 
     @BeforeClass
     public static void init() {
+        DAOFactory.getInstance().inject(DAO_CONFIGURATION);
         dao = DAOFactory.getInstance().getRoomDAO();
         try {
             DAOFactory.getInstance().getPoolDAO().init();
@@ -40,7 +42,7 @@ public class MySQLRoomDAOTest {
             transactionManager.doInTransaction(() -> {
                 dao.insert(expectedRoom);
 
-                List<Room> rooms = dao.findAll(0, 10);
+                List<Room> rooms = dao.findAll(0, 1000);
                 Room actualRoom = rooms.get(rooms.size() - 1);
 
                 dao.delete(actualRoom.getNumber());
@@ -67,7 +69,7 @@ public class MySQLRoomDAOTest {
             transactionManager.doInTransaction(() -> {
                 dao.insert(room);
 
-                List<Room> rooms = dao.findAll(0,10);
+                List<Room> rooms = dao.findAll(0, 1000);
                 Room insertedRoom = rooms.get(rooms.size() - 1);
 
                 insertedRoom.setSeatsNumber(4);
@@ -94,11 +96,11 @@ public class MySQLRoomDAOTest {
     public void testDelete() throws Exception {
         try {
             transactionManager.doInTransaction(() -> {
-                List<Room> rooms = dao.findAll(0, 10);
+                List<Room> rooms = dao.findAll(0, 1000);
                 Room room = rooms.get(rooms.size() - 1);
                 int expectedCount = rooms.size() - 1;
                 dao.delete(room.getNumber());
-                rooms = dao.findAll(0, 10);
+                rooms = dao.findAll(0, 1000);
                 int actualCount = rooms.size();
                 dao.insert(room);
                 Assert.assertEquals(expectedCount, actualCount);

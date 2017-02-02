@@ -28,6 +28,15 @@
 <f:message bundle="${local}" key="local.editButton" var="editButton"/>
 <f:message bundle="${local}" key="local.saveButton" var="saveButton"/>
 <f:message bundle="${local}" key="local.editRoom" var="editRoom"/>
+<f:message bundle="${local}" key="local.next" var="next"/>
+<f:message bundle="${local}" key="local.last" var="last"/>
+<f:message bundle="${local}" key="local.first" var="first"/>
+<f:message bundle="${local}" key="local.prev" var="prev"/>
+<f:message bundle="${local}" key="local.emptyField" var="emptyField"/>
+<f:message bundle="${local}" key="local.invalidSeatsNumber" var="invalidSeatsNumber"/>
+<f:message bundle="${local}" key="local.invalidRoomNumber" var="invalidRoomNumber"/>
+<f:message bundle="${local}" key="local.invalidPerdayCost" var="invalidPerdayCost"/>
+<f:message bundle="${local}" key="local.functions" var="functions"/>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -35,7 +44,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${siteName}</title>
+    <title>${siteName} - ${rooms}</title>
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/img/hostel_icon.png" type="image/png">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
@@ -82,18 +91,37 @@
                             <input type="hidden" name="command" value="addRoom"/>
                             <div class="form-group">
                                 <label for="addRoomNumber">${number}:</label>
-                                <input name="addFormRoomNumber" type="number"
-                                       max="999" min="100" class="form-control" id="addRoomNumber">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+                                    <input name="addFormRoomNumber" type="number"
+                                           max="999" min="100" class="form-control" id="addRoomNumber"
+                                           title="${invalidRoomNumber}" required
+                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidRoomNumber}")'
+                                           onchange="try{this.setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="addRoomSeatsNumber">${seatsNumber}:</label>
-                                <input name="addFormRoomSeatsNumber" type="number"
-                                       max="5" min="1" class="form-control" id="addRoomSeatsNumber">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-cog"></i></span>
+                                    <input name="addFormRoomSeatsNumber" type="number"
+                                           max="5" min="1" class="form-control" id="addRoomSeatsNumber"
+                                           title="${invalidSeatsNumber}" required
+                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidSeatsNumber}")'
+                                           onchange="try{this.setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="addRoomPerdayCost">${perdayCost}:</label>
-                                <input name="addFormRoomPerdayCost" type="number"
-                                       max="300" min="10" class="form-control" id="addRoomPerdayCost">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i
+                                            class="glyphicon glyphicon-credit-card"></i></span>
+                                    <input name="addFormRoomPerdayCost" type="number"
+                                           max="300" min="10" class="form-control" id="addRoomPerdayCost"
+                                           title="${invalidPerdayCost}" required
+                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidPerdayCost}")'
+                                           onchange="try{this.setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-default">${applyButton}</button>
@@ -150,14 +178,24 @@
             <th>${seatsNumber}</th>
             <th>${perdayCost}</th>
         </tr>
-        <c:forEach var="room" items="${requestScope.rooms}">
+        <c:forEach var="room" items="${requestScope.rooms.content}">
             <tr>
                 <c:if test="${sessionScope.userRole}">
                     <td>
-                        <a href="${pageContext.request.contextPath}/Controller?command=deleteRoom&deleteFormRoomNumber=${room.number}"
-                           class="btn btn-default">${deleteButton}</a>
-                        <button class="btn btn-default" type="button" data-toggle="modal"
-                                data-target="#editRoomModal${room.number}">${editButton}</button>
+                        <div class="dropdown functions">
+                            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                                    ${functions} <b class="caret"></b>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="${pageContext.request.contextPath}/Controller?command=deleteRoom&deleteFormRoomNumber=${room.number}">${deleteButton}</a>
+                                </li>
+                                <li>
+                                    <a type="button" data-toggle="modal"
+                                       data-target="#editRoomModal${room.number}">${editButton}</a>
+                                </li>
+                            </ul>
+                        </div>
                         <div id="editRoomModal${room.number}" class="modal fade">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -172,20 +210,43 @@
                                                    value="${room.number}"/>
                                             <div class="form-group">
                                                 <label for="editRoomNumber">${number}:</label>
-                                                <input name="editFormRoomNumber" type="number" value="${room.number}"
-                                                       max="999" min="100" class="form-control" id="editRoomNumber">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i
+                                                            class="glyphicon glyphicon-home"></i></span>
+                                                    <input name="editFormRoomNumber" type="number"
+                                                           value="${room.number}"
+                                                           max="999" min="100" class="form-control" id="editRoomNumber"
+                                                           title="${invalidRoomNumber}" required
+                                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidRoomNumber}")'
+                                                           onchange="try{this.setCustomValidity('')}catch(e){}">
+                                                </div>
                                             </div>
                                             <div class="form-group">
                                                 <label for="editRoomSeatsNumber">${seatsNumber}:</label>
-                                                <input name="editFormRoomSeatsNumber" type="number"
-                                                       value="${room.seatsNumber}"
-                                                       max="5" min="1" class="form-control" id="editRoomSeatsNumber">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i
+                                                            class="glyphicon glyphicon-cog"></i></span>
+                                                    <input name="editFormRoomSeatsNumber" type="number"
+                                                           value="${room.seatsNumber}"
+                                                           max="5" min="1" class="form-control"
+                                                           id="editRoomSeatsNumber" title="${invalidSeatsNumber}"
+                                                           required
+                                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidSeatsNumber}")'
+                                                           onchange="try{this.setCustomValidity('')}catch(e){}">
+                                                </div>
                                             </div>
                                             <div class="form-group">
                                                 <label for="editRoomPerdayCost">${perdayCost}:</label>
-                                                <input name="editFormRoomPerdayCost" type="number"
-                                                       value="${room.perdayCost}"
-                                                       max="300" min="10" class="form-control" id="editRoomPerdayCost">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i
+                                                            class="glyphicon glyphicon-credit-card"></i></span>
+                                                    <input name="editFormRoomPerdayCost" type="number"
+                                                           value="${room.perdayCost}"
+                                                           max="300" min="10" class="form-control"
+                                                           id="editRoomPerdayCost" title="${invalidPerdayCost}" required
+                                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidPerdayCost}")'
+                                                           onchange="try{this.setCustomValidity('')}catch(e){}">
+                                                </div>
                                             </div>
                                             <div class="form-group">
                                                 <button type="submit" class="btn btn-default">${saveButton}</button>
@@ -199,6 +260,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </td>
                 </c:if>
                 <td>${room.number}</td>
@@ -207,7 +269,30 @@
             </tr>
         </c:forEach>
     </table>
-    <button onclick="getRooms(2)">more</button>
+    <div class="ta_center">
+        <div class="btn-group">
+            <c:if test="${requestScope.rooms.currentPage != 1}">
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&page=1<c:if test="${param.seatsNumber != null}">&seatsNumber=${param.seatsNumber}</c:if>"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-fast-backward"></span> ${first}
+                </a>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&page=${requestScope.rooms.currentPage - 1}<c:if test="${param.seatsNumber != null}">&seatsNumber=${param.seatsNumber}</c:if>"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-chevron-left"></span> ${prev}
+                </a>
+            </c:if>
+            <c:if test="${requestScope.rooms.lastPage > requestScope.rooms.currentPage}">
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&page=${requestScope.rooms.currentPage +1}<c:if test="${param.seatsNumber != null}">&seatsNumber=${param.seatsNumber}</c:if>"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-chevron-right"></span> ${next}
+                </a>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&page=${requestScope.rooms.lastPage}<c:if test="${param.seatsNumber != null}">&seatsNumber=${param.seatsNumber}</c:if>"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon glyphicon-fast-forward"></span> ${last}
+                </a>
+            </c:if>
+        </div>
+    </div>
     <hr>
 
 </div>
@@ -216,6 +301,5 @@
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/ajaxviewrooms.js"></script>
 </body>
 </html>

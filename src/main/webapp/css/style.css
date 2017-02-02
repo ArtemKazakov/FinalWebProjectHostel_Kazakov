@@ -85,3 +85,8 @@ body {
 .extra_wrapper{
     min-height: 140px;
 }
+
+.functions > ul li a:hover,
+.functions > ul li a:focus {
+    cursor: pointer;
+}

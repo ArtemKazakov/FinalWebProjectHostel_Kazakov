@@ -53,7 +53,7 @@ public class EditRentalRequestCommand implements Command {
         boolean status;
         int statusNumber = CommandHelper.getInt(request.getParameter(RENTAL_REQUEST_STATUS_PARAM));
         if (statusNumber == 1 || statusNumber == 0){
-            status = Boolean.valueOf(request.getParameter(RENTAL_REQUEST_STATUS_PARAM));
+            status = statusNumber != 0;
         } else {
             response.sendRedirect(MAIN_PAGE);
             return;

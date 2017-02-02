@@ -8,9 +8,6 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by ASUS on 30.01.2017.
- */
 public class ValidatorTest {
 
     @Test

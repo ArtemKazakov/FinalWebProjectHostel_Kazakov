@@ -20,11 +20,14 @@ import static org.junit.Assert.*;
 
 
 public class MySQLPassportDAOTest {
+    private static final String DAO_CONFIGURATION = "/bean/daobeans.xml";
+
     private static PassportDAO dao;
     private static TransactionManager transactionManager = TransactionManagerImpl.getInstance();
 
     @BeforeClass
     public static void init() {
+        DAOFactory.getInstance().inject(DAO_CONFIGURATION);
         dao = DAOFactory.getInstance().getPassportDAO();
         try {
             DAOFactory.getInstance().getPoolDAO().init();

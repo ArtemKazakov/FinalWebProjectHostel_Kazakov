@@ -76,4 +76,24 @@ public interface RequestDAO {
      *                      a data source or a connection with it
      */
     List<RentalRequest> findAll() throws DAOException;
+
+    /**
+     * Gives a list of all rental requests from a data source.
+     *
+     * @param start a number from which entries will be returned
+     * @param amount of entries
+     * @return a {@link List} of rental requests
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    List<RentalRequest> findAllLimited(int start, int amount) throws DAOException;
+
+    /**
+     * Gives number of requests in a data source.
+     *
+     * @return count of requests
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    int selectRequestCount() throws DAOException;
 }

@@ -1,7 +1,9 @@
 package com.epam.hostel.command.impl.rentalrequest;
 
+import com.epam.hostel.bean.entity.PagedList;
 import com.epam.hostel.bean.entity.RentalRequest;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.command.util.LanguageUtil;
 import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.RentalRequestService;
@@ -31,6 +33,11 @@ public class ViewRentalRequestsListCommand implements Command {
     private static final String RENTAL_REQS_REQUEST_ATTR = "requestsList";
     private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
 
+    private static final String PAGE_PARAM = "page";
+
+    private static final int AMOUNT = 10;
+    private static final int DEFAULT_PAGE = 1;
+
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -41,6 +48,11 @@ public class ViewRentalRequestsListCommand implements Command {
             return;
         }
 
+        int page = CommandHelper.getInt(request.getParameter(PAGE_PARAM));
+        if (page == -1){
+            page = DEFAULT_PAGE;
+        }
+
         QueryUtil.saveCurrentQueryToSession(request);
         String languageId = LanguageUtil.getLanguageId(request);
         request.setAttribute(SELECTED_LANGUAGE_REQUEST_ATTR, languageId);
@@ -48,8 +60,15 @@ public class ViewRentalRequestsListCommand implements Command {
         try {
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
             RentalRequestService rentalRequestService = serviceFactory.getRentalRequestService();
-            List<RentalRequest> rentalRequests = rentalRequestService.getAllRentalRequests();
-            request.setAttribute(RENTAL_REQS_REQUEST_ATTR, rentalRequests);
+            List<RentalRequest> rentalRequests = rentalRequestService.getAllRentalRequestsLimited((page-1)*AMOUNT, AMOUNT);
+            int count = rentalRequestService.getRentalRequestsCount();
+
+            PagedList<RentalRequest> pagedList = new PagedList<>();
+            pagedList.setContent(rentalRequests);
+            pagedList.setLastPage((int)Math.ceil(count/(double)AMOUNT));
+            pagedList.setCurrentPage(page);
+
+            request.setAttribute(RENTAL_REQS_REQUEST_ATTR, pagedList);
         } catch (ServiceException e){
             logger.warn(e);
             request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);

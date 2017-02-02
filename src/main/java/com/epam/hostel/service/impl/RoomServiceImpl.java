@@ -127,12 +127,19 @@ public class RoomServiceImpl extends Service implements RoomService {
     /**
      * Return all rooms from a data source
      *
+     * @param start  the number from which accounts will be returned
+     * @param amount of rooms
      * @return a {@link List} of rooms
      * @throws ServiceException in case of error occurred with a data source
      *                          or validation of data
      */
     @Override
     public List<Room> getAllRooms(int start, int amount) throws ServiceException {
+        if (!Validator.validateStart(start) ||
+                !Validator.validateInt(amount)) {
+            throw new ServiceException("Wrong seats number for getting all rooms");
+        }
+
         return this.service("Service layer: cannot get all rooms",
                 () -> roomDAO.findAll(start, amount)
         );
@@ -141,19 +148,23 @@ public class RoomServiceImpl extends Service implements RoomService {
     /**
      * Return all rooms from a data source by seats number
      *
+     * @param start       the number from which accounts will be returned
+     * @param amount      of rooms
      * @param seatsNumber a seats number of finding rooms
      * @return a {@link List} of rooms
      * @throws ServiceException in case of error occurred with a data source
      *                          or validation of data
      */
     @Override
-    public List<Room> getAllRoomsBySeatsNumber(int seatsNumber) throws ServiceException {
-        if (!Validator.validateSeatsNumber(seatsNumber)) {
-            throw new ServiceException("Wrong seats number for getting rooms");
+    public List<Room> getAllRoomsBySeatsNumber(int start, int amount, int seatsNumber) throws ServiceException {
+        if (!Validator.validateSeatsNumber(seatsNumber) ||
+                !Validator.validateStart(start) ||
+                !Validator.validateInt(amount)) {
+            throw new ServiceException("Wrong seats number for getting rooms by seats number");
         }
 
         return this.service("Service layer: cannot get all rooms by seats number",
-                () -> roomDAO.findBySeatsNumber(seatsNumber)
+                () -> roomDAO.findBySeatsNumberLimited(start, amount, seatsNumber)
         );
     }
 
@@ -203,6 +214,36 @@ public class RoomServiceImpl extends Service implements RoomService {
             logger.error(e);
             throw new ServiceException("Service layer: cannot get all suitable rooms", e);
         }
+    }
+
+    /**
+     * Returns number of rooms in data source.
+     *
+     * @return amount of rooms
+     * @throws ServiceException if error occurred with data source
+     */
+    @Override
+    public int getRoomsCount() throws ServiceException {
+        return this.service("Service layer: cannot get count of rooms",
+                roomDAO::selectRoomCount
+        );
+    }
+
+    /**
+     * Returns number of rooms in data source.
+     *
+     * @param seatsNumber a seats number of finding rooms
+     * @return amount of rooms
+     * @throws ServiceException if error occurred with data source
+     */
+    @Override
+    public int getRoomsCountBySeatsNumber(int seatsNumber) throws ServiceException {
+        if (!Validator.validateSeatsNumber(seatsNumber)) {
+            throw new ServiceException("Wrong parameters for getting count of rooms by seats number");
+        }
+        return this.service("Service layer: cannot get count of rooms",
+                () -> roomDAO.selectRoomCountBySeatsNumber(seatsNumber)
+        );
     }
 
     /**

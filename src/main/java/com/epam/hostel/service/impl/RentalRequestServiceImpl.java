@@ -141,7 +141,7 @@ public class RentalRequestServiceImpl extends Service implements RentalRequestSe
 
         this.service("Service layer: cannot delete a request",
                 () -> {
-                    discountDAO.delete(id);
+                    requestDAO.delete(id);
                     return Optional.empty();
                 }
         );
@@ -211,6 +211,38 @@ public class RentalRequestServiceImpl extends Service implements RentalRequestSe
     }
 
     /**
+     * Return all rental requests from a data source
+     *
+     * @param start       the number from which accounts will be returned
+     * @param amount      of rental requests
+     * @return a {@link List} of rental requests
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
+    @Override
+    public List<RentalRequest> getAllRentalRequestsLimited(int start, int amount) throws ServiceException {
+        try {
+            return transactionManager.doInTransaction(() -> {
+                List<RentalRequest> rentalRequests = requestDAO.findAllLimited(start, amount);
+
+                for (RentalRequest rentalRequest : rentalRequests) {
+                    rentalRequest.setClient(userDAO.findByIdAndRole(rentalRequest.getClient().getId(), false));
+                    if (rentalRequest.getAdministrator().getId() != 0) {
+                        rentalRequest.setAdministrator(userDAO.findByIdAndRole(rentalRequest.getAdministrator().getId(), true));
+                    } else {
+                        rentalRequest.setAdministrator(null);
+                    }
+                }
+
+                return rentalRequests;
+            });
+        } catch (DAOException e) {
+            logger.error(e);
+            throw new ServiceException("Service layer: cannot get all requests limited", e);
+        }
+    }
+
+    /**
      * Return all rental requests from a data source by client id
      *
      * @param id an id of client that make rental requests
@@ -226,6 +258,19 @@ public class RentalRequestServiceImpl extends Service implements RentalRequestSe
 
         return this.service("Service layer: cannot get all requests by client id",
                 () ->  requestDAO.findByClientId(id)
+        );
+    }
+
+    /**
+     * Returns number of rental requests in data source.
+     *
+     * @return amount of rental requests
+     * @throws ServiceException if error occurred with data source
+     */
+    @Override
+    public int getRentalRequestsCount() throws ServiceException {
+        return this.service("Service layer: cannot get count of rental requests",
+                requestDAO::selectRequestCount
         );
     }
 }

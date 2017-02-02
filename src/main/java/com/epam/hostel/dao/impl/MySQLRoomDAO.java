@@ -28,7 +28,13 @@ public class MySQLRoomDAO extends MySQLDAO implements RoomDAO {
 
     private static final String SELECT_ALL_ROOMS_QUERY = "SELECT * FROM `rooms` LIMIT ?, ?;";
 
+    private static final String SELECT_ROOMS_BY_SEATS_NUMBER_LIMITED_QUERY = "SELECT * FROM `rooms` WHERE `seats_number` = ? LIMIT ?, ?;";
+
     private static final String SELECT_ROOMS_BY_SEATS_NUMBER_QUERY = "SELECT * FROM `rooms` WHERE `seats_number` = ? ";
+
+    private static final String SELECT_COUNT_OF_ROOMS = "SELECT COUNT(*) FROM `rooms`;";
+
+    private static final String SELECT_COUNT_OF_ROOMS_BY_SEATS_NUMBER = "SELECT COUNT(*) FROM `rooms` WHERE `seats_number` = ? ;";
 
     private DataSource dataSource = (DataSource) TransactionManagerImpl.getInstance();
 
@@ -111,6 +117,8 @@ public class MySQLRoomDAO extends MySQLDAO implements RoomDAO {
     /**
      * Gives a list of all rooms from a database.
      *
+     * @param start  a number from which entries will be returned
+     * @param amount of entries
      * @return a {@link List} of rooms
      * @throws DAOException in case of some exception with
      *                      a database or a connection with it
@@ -129,6 +137,28 @@ public class MySQLRoomDAO extends MySQLDAO implements RoomDAO {
     /**
      * Gives a list of rooms from a database by seats number.
      *
+     * @param start       a number from which entries will be returned
+     * @param amount      of entries
+     * @param seatsNumber a seats number of desired rooms
+     * @return a {@link List} of rooms containing the necessary data
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
+    @Override
+    public List<Room> findBySeatsNumberLimited(int start, int amount, int seatsNumber) throws DAOException {
+        return select(dataSource, SELECT_ROOMS_BY_SEATS_NUMBER_LIMITED_QUERY, "DAO layer: cannot get rooms by seats number",
+                preparedStatement -> {
+                    preparedStatement.setInt(1, seatsNumber);
+                    preparedStatement.setInt(2, start);
+                    preparedStatement.setInt(3, amount);
+                },
+                this::createRoom
+        );
+    }
+
+    /**
+     * Gives a list of rooms from a database by seats number.
+     *
      * @param seatsNumber a seats number of desired rooms
      * @return a {@link List} of rooms containing the necessary data
      * @throws DAOException in case of some exception with
@@ -139,6 +169,47 @@ public class MySQLRoomDAO extends MySQLDAO implements RoomDAO {
         return select(dataSource, SELECT_ROOMS_BY_SEATS_NUMBER_QUERY, "DAO layer: cannot get rooms by seats number",
                 preparedStatement -> preparedStatement.setInt(1, seatsNumber),
                 this::createRoom
+        );
+    }
+
+    /**
+     * Gives number of rooms in a database.
+     *
+     * @return count of rooms
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    @Override
+    public int selectRoomCount() throws DAOException {
+        return this.singleSelect(
+                dataSource,
+                SELECT_COUNT_OF_ROOMS,
+                "Can't get count of rooms",
+                resultSet -> {
+                    resultSet.next();
+                    return resultSet.getInt(1);
+                }
+        );
+    }
+
+    /**
+     * Gives number of rooms in a database.
+     *
+     * @return count of rooms
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    @Override
+    public int selectRoomCountBySeatsNumber(int seatsNumber) throws DAOException {
+        return this.singleSelect(
+                dataSource,
+                SELECT_COUNT_OF_ROOMS_BY_SEATS_NUMBER,
+                "Can't get count of rooms by seats number",
+                preparedStatement -> preparedStatement.setInt(1, seatsNumber),
+                resultSet -> {
+                    resultSet.next();
+                    return resultSet.getInt(1);
+                }
         );
     }
 

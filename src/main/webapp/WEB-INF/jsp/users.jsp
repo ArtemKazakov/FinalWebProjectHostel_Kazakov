@@ -29,6 +29,10 @@
 <f:message bundle="${local}" key="local.clients" var="clients"/>
 <f:message bundle="${local}" key="local.requests" var="requests"/>
 <f:message bundle="${local}" key="local.schedule" var="schedule"/>
+<f:message bundle="${local}" key="local.next" var="next"/>
+<f:message bundle="${local}" key="local.last" var="last"/>
+<f:message bundle="${local}" key="local.first" var="first"/>
+<f:message bundle="${local}" key="local.prev" var="prev"/>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,7 +40,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${siteName}</title>
+    <title>${siteName} - ${clients}</title>
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/img/hostel_icon.png" type="image/png">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
@@ -69,7 +73,7 @@
             <th>${patronymic}</th>
             <th>${birthdayDate}</th>
         </tr>
-        <c:forEach var="user" items="${requestScope.users}">
+        <c:forEach var="user" items="${requestScope.users.content}">
             <tr>
                 <td><a href="${pageContext.request.contextPath}/Controller?command=viewUser&clientId=${user.id}"><span
                         class="glyphicon glyphicon-edit"></span></a></td>
@@ -87,7 +91,30 @@
             </tr>
         </c:forEach>
     </table>
-
+    <div class="ta_center">
+        <div class="btn-group">
+            <c:if test="${requestScope.users.currentPage != 1}">
+                <a href="${pageContext.request.contextPath}/Controller?command=viewUsersList&page=1"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-fast-backward"></span> ${first}
+                </a>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewUsersList&page=${requestScope.users.currentPage - 1}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-chevron-left"></span> ${prev}
+                </a>
+            </c:if>
+            <c:if test="${requestScope.users.lastPage > requestScope.users.currentPage}">
+                <a href="${pageContext.request.contextPath}/Controller?command=viewUsersList&page=${requestScope.users.currentPage +1}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-chevron-right"></span> ${next}
+                </a>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewUsersList&page=${requestScope.users.lastPage}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon glyphicon-fast-forward"></span> ${last}
+                </a>
+            </c:if>
+        </div>
+    </div>
     <hr>
 
 </div>

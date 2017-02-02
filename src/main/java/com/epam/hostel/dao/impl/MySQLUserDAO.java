@@ -41,7 +41,10 @@ public class MySQLUserDAO extends MySQLDAO implements UserDAO {
 
 	private static final String SELECT_ADMINISTRATOR_BY_ID_QUERY = "SELECT * FROM `administrators` WHERE `id_administrator` = ? ";
 
-	private static final String SELECT_ALL_CLIENTS_QUERY = "SELECT * FROM `clients` ";
+	private static final String SELECT_ALL_CLIENTS_QUERY = "SELECT * FROM `clients` LIMIT ?, ?;";
+
+	private static final String SELECT_COUNT_OF_USERS = "SELECT COUNT(*) FROM `clients`;";
+
 
 	private DataSource dataSource = (DataSource) TransactionManagerImpl.getInstance();
 
@@ -229,14 +232,40 @@ public class MySQLUserDAO extends MySQLDAO implements UserDAO {
 	/**
 	 * Gives a list of all users from a database.
 	 *
+	 * @param start  a number from which entries will be returned
+	 * @param amount of entries
 	 * @return a {@link List} of users
 	 * @throws DAOException in case of some exception with
 	 *                      a database or a connection with it
 	 */
 	@Override
-	public List<User> findAll() throws DAOException {
+	public List<User> findAll(int start, int amount) throws DAOException {
 		return select(dataSource, SELECT_ALL_CLIENTS_QUERY, "DAO layer: cannot select all users",
+				preparedStatement -> {
+					preparedStatement.setInt(1, start);
+					preparedStatement.setInt(2, amount);
+				},
 				this :: createUser
+		);
+	}
+
+	/**
+	 * Gives number of users in a database.
+	 *
+	 * @return count of users
+	 * @throws DAOException in case of some exception with
+	 *                      a data source or a connection with it
+	 */
+	@Override
+	public int selectUserCount() throws DAOException {
+		return this.singleSelect(
+				dataSource,
+				SELECT_COUNT_OF_USERS,
+				"Can't get count of users",
+				resultSet -> {
+					resultSet.next();
+					return resultSet.getInt(1);
+				}
 		);
 	}
 

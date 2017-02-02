@@ -72,8 +72,7 @@ public class UserServiceImpl extends Service implements UserService {
         if (!Validator.validatePassword(user.getPassword())) {
             throw new ServiceWrongPasswordException("Wrong password");
         }
-        if (!Validator.validateInt(passport.getId()) ||
-                !Validator.validatePassportIdNumber(passport.getIdentificationNumber()) ||
+        if (!Validator.validatePassportIdNumber(passport.getIdentificationNumber()) ||
                 !Validator.validatePassportSeries(passport.getSeries()) ||
                 !Validator.validateName(passport.getSurname()) ||
                 !Validator.validateName(passport.getName()) ||
@@ -113,15 +112,17 @@ public class UserServiceImpl extends Service implements UserService {
     /**
      * Return all users from a data source
      *
+     * @param start  the number from which accounts will be returned
+     * @param amount of users
      * @return a {@link List} of users
      * @throws ServiceException in case of error occurred with a data source
      *                          or validation of data
      */
     @Override
-    public List<User> getAllUsers() throws ServiceException {
+    public List<User> getAllUsers(int start, int amount) throws ServiceException {
         try {
             return transactionManager.doInTransaction(() -> {
-                List<User> users = userDAO.findAll();
+                List<User> users = userDAO.findAll(start, amount);
                 for (User user : users) {
                     Passport passport = passportDAO.findById(user.getPassport().getId());
                     user.setPassport(passport);
@@ -130,7 +131,7 @@ public class UserServiceImpl extends Service implements UserService {
             });
         } catch (DAOException e) {
             logger.error(e);
-            throw new ServiceException("Service layer: cannot get all rooms", e);
+            throw new ServiceException("Service layer: cannot get all users", e);
         }
     }
 
@@ -180,6 +181,19 @@ public class UserServiceImpl extends Service implements UserService {
                     passportDAO.delete(user.getPassport().getId());
                     return Optional.empty();
                 }
+        );
+    }
+
+    /**
+     * Returns number of users in data source.
+     *
+     * @return amount of users
+     * @throws ServiceException if error occurred with data source
+     */
+    @Override
+    public int getUsersCount() throws ServiceException {
+        return this.service("Service layer: cannot get count of users",
+                userDAO::selectUserCount
         );
     }
 

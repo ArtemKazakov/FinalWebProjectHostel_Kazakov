@@ -32,7 +32,11 @@ public class MySQLRequestDAO extends MySQLDAO implements RequestDAO {
 
     private static final String SELECT_ALL_REQUESTS_QUERY = "SELECT * FROM `requests`";
 
+    private static final String SELECT_ALL_REQUESTS_LIMITED_QUERY = "SELECT * FROM `requests` LIMIT ?, ?;";
+
     private static final String DELETE_REQUEST_BY_ID_QUERY = "DELETE FROM `requests` WHERE `id_request` = ? ";
+
+    private static final String SELECT_COUNT_OF_REQUESTS = "SELECT COUNT(*) FROM `requests`;";
 
     private DataSource dataSource = (DataSource) TransactionManagerImpl.getInstance();
 
@@ -168,6 +172,46 @@ public class MySQLRequestDAO extends MySQLDAO implements RequestDAO {
     public List<RentalRequest> findAll() throws DAOException {
         return select(dataSource, SELECT_ALL_REQUESTS_QUERY, "DAO layer: cannot select all rentalRequests",
                 this :: createRentalRequest
+        );
+    }
+
+    /**
+     * Gives a list of all rental requests from a database.
+     *
+     * @param start  a number from which entries will be returned
+     * @param amount of entries
+     * @return a {@link List} of rental requests
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
+    @Override
+    public List<RentalRequest> findAllLimited(int start, int amount) throws DAOException {
+        return select(dataSource, SELECT_ALL_REQUESTS_LIMITED_QUERY, "DAO layer: cannot get all requests limited",
+                preparedStatement -> {
+                    preparedStatement.setInt(1, start);
+                    preparedStatement.setInt(2, amount);
+                },
+                this::createRentalRequest
+        );
+    }
+
+    /**
+     * Gives number of rental requests in a database.
+     *
+     * @return count of rental requests
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    @Override
+    public int selectRequestCount() throws DAOException {
+        return this.singleSelect(
+                dataSource,
+                SELECT_COUNT_OF_REQUESTS,
+                "Can't get count of rental requests",
+                resultSet -> {
+                    resultSet.next();
+                    return resultSet.getInt(1);
+                }
         );
     }
 

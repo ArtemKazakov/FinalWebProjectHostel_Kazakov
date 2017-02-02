@@ -62,6 +62,17 @@ public interface RentalRequestService {
     List<RentalRequest> getAllRentalRequests() throws ServiceException;
 
     /**
+     * Return all rental requests from a data source
+     *
+     * @param start       the number from which accounts will be returned
+     * @param amount      of rental requests
+     * @return a {@link List} of rental requests
+     * @throws ServiceException in case of error occurred with a data source
+     *                          or validation of data
+     */
+    List<RentalRequest> getAllRentalRequestsLimited(int start, int amount) throws ServiceException;
+
+    /**
      * Return all rental requests from a data source by client id
      *
      * @param id an id of client that make rental requests
@@ -70,5 +81,13 @@ public interface RentalRequestService {
      *                          or validation of data
      */
     List<RentalRequest> getAllRentalRequestsByClientId(int id) throws ServiceException;
+
+    /**
+     * Returns number of rental requests in data source.
+     *
+     * @return amount of rental requests
+     * @throws ServiceException if error occurred with data source
+     */
+    int getRentalRequestsCount() throws ServiceException;
 
 }

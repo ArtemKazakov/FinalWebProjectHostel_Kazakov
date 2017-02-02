@@ -45,12 +45,18 @@
                             <form class="navbar-form" action="Controller" method="post">
                                 <input type="hidden" name="command" value="log_in"/>
                                 <div class="form-group">
-                                    <input type="text" name="logInFormLogin" placeholder="${login}"
-                                           class="form-control">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                        <input type="text" name="logInFormLogin" placeholder="${login}"
+                                               class="form-control">
+                                    </div>
                                 </div>
                                 <div class="form-group">
-                                    <input type="password" name="logInFormPassword" placeholder="${password}"
-                                           class="form-control">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                                        <input type="password" name="logInFormPassword" placeholder="${password}"
+                                               class="form-control">
+                                    </div>
                                 </div>
                                 <button type="submit" class="btn btn-success">${loginButton}</button>
                             </form>

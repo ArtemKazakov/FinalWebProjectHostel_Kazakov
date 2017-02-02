@@ -85,17 +85,17 @@
     <command>
         <name>banUser</name>
         <class>com.epam.hostel.command.impl.user.BanUserCommand</class>
-        <method>POST</method>
+        <method>GET</method>
     </command>
     <command>
         <name>deleteUser</name>
         <class>com.epam.hostel.command.impl.user.DeleteUserCommand</class>
-        <method>POST</method>
+        <method>GET</method>
     </command>
     <command>
         <name>deleteDiscount</name>
         <class>com.epam.hostel.command.impl.discount.DeleteDiscountCommand</class>
-        <method>POST</method>
+        <method>GET</method>
     </command>
     <command>
         <name>editDiscount</name>
@@ -115,7 +115,7 @@
     <command>
         <name>deleteRoom</name>
         <class>com.epam.hostel.command.impl.room.DeleteRoomCommand</class>
-        <method>POST</method>
+        <method>GET</method>
     </command>
     <command>
         <name>viewRequestsList</name>
@@ -135,16 +135,11 @@
     <command>
         <name>editRequest</name>
         <class>com.epam.hostel.command.impl.rentalrequest.EditRentalRequestCommand</class>
-        <method>POST</method>
+        <method>GET</method>
     </command>
     <command>
         <name>deleteRequest</name>
         <class>com.epam.hostel.command.impl.rentalrequest.DeleteRentalRequestCommand</class>
-        <method>POST</method>
-    </command>
-    <command>
-        <name>getRooms</name>
-        <class>com.epam.hostel.command.impl.room.GetRoomsCommand</class>
         <method>GET</method>
     </command>
 

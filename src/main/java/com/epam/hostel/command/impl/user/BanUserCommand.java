@@ -53,7 +53,7 @@ public class BanUserCommand implements Command {
         boolean banned;
         int bannedNumber = CommandHelper.getInt(request.getParameter(BAN_STATUS_PARAM));
         if (bannedNumber == 1 || bannedNumber == 0){
-            banned = Boolean.valueOf(request.getParameter(BAN_STATUS_PARAM));
+            banned = bannedNumber != 0;
         } else {
             response.sendRedirect(MAIN_PAGE);
             return;

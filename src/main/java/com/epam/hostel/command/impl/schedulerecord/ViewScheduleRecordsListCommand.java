@@ -1,7 +1,9 @@
 package com.epam.hostel.command.impl.schedulerecord;
 
+import com.epam.hostel.bean.entity.PagedList;
 import com.epam.hostel.bean.entity.ScheduleRecord;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.command.util.LanguageUtil;
 import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.ScheduleRecordService;
@@ -31,6 +33,11 @@ public class ViewScheduleRecordsListCommand implements Command {
     private static final String SCHEDULE_RECORDS_REQUEST_ATTR = "scheduleRecords";
     private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
 
+    private static final String PAGE_PARAM = "page";
+
+    private static final int AMOUNT = 10;
+    private static final int DEFAULT_PAGE = 1;
+
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -41,6 +48,11 @@ public class ViewScheduleRecordsListCommand implements Command {
             return;
         }
 
+        int page = CommandHelper.getInt(request.getParameter(PAGE_PARAM));
+        if (page == -1){
+            page = DEFAULT_PAGE;
+        }
+
         QueryUtil.saveCurrentQueryToSession(request);
         String languageId = LanguageUtil.getLanguageId(request);
         request.setAttribute(SELECTED_LANGUAGE_REQUEST_ATTR, languageId);
@@ -48,8 +60,14 @@ public class ViewScheduleRecordsListCommand implements Command {
         try {
             ServiceFactory serviceFactory = ServiceFactory.getInstance();
             ScheduleRecordService scheduleRecordService = serviceFactory.getScheduleRecordService();
-            List<ScheduleRecord> scheduleRecords = scheduleRecordService.getAllScheduleRecords();
-            request.setAttribute(SCHEDULE_RECORDS_REQUEST_ATTR, scheduleRecords);
+            List<ScheduleRecord> scheduleRecords = scheduleRecordService.getAllScheduleRecordsLimited((page-1)*AMOUNT, AMOUNT);
+            int count = scheduleRecordService.getScheduleRecordsCount();
+
+            PagedList<ScheduleRecord> pagedList = new PagedList<>();
+            pagedList.setContent(scheduleRecords);
+            pagedList.setLastPage((int)Math.ceil(count/(double)AMOUNT));
+            pagedList.setCurrentPage(page);
+            request.setAttribute(SCHEDULE_RECORDS_REQUEST_ATTR, pagedList);
         } catch (ServiceException e){
             logger.warn(e);
             request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);

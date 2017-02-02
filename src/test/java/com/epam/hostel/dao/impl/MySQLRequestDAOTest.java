@@ -20,12 +20,14 @@ import static org.junit.Assert.*;
 
 
 public class MySQLRequestDAOTest {
+    private static final String DAO_CONFIGURATION = "/bean/daobeans.xml";
 
     private static RequestDAO dao;
     private static TransactionManager transactionManager = TransactionManagerImpl.getInstance();
 
     @BeforeClass
     public static void init() {
+        DAOFactory.getInstance().inject(DAO_CONFIGURATION);
         dao = DAOFactory.getInstance().getRequestDAO();
         try {
             DAOFactory.getInstance().getPoolDAO().init();

@@ -1,5 +1,6 @@
 package com.epam.hostel.command.impl.room;
 
+import com.epam.hostel.bean.entity.PagedList;
 import com.epam.hostel.bean.entity.Room;
 import com.epam.hostel.command.Command;
 import com.epam.hostel.command.util.CommandHelper;
@@ -26,6 +27,7 @@ public class ViewRoomsListCommand implements Command{
     private static final String JSP_PAGE_PATH = "WEB-INF/jsp/rooms.jsp";
 
     private static final String SEATS_NUMBER_PARAM = "seatsNumber";
+    private static final String PAGE_PARAM = "page";
 
     private static final String ROOMS_ATTRIBUTE = "rooms";
 
@@ -44,17 +46,30 @@ public class ViewRoomsListCommand implements Command{
 
         int seatsNumber = CommandHelper.getInt(request.getParameter(SEATS_NUMBER_PARAM));
 
+        int page = CommandHelper.getInt(request.getParameter(PAGE_PARAM));
+        if (page == -1){
+            page = DEFAULT_PAGE;
+        }
+
         try {
             RoomService roomService = ServiceFactory.getInstance().getRoomService();
             List<Room> rooms;
+            int count = 0;
 
             if(seatsNumber == -1) {
-                rooms = roomService.getAllRooms((DEFAULT_PAGE-1)*AMOUNT, AMOUNT);
+                rooms = roomService.getAllRooms((page-1)*AMOUNT, AMOUNT);
+                count = roomService.getRoomsCount();
             } else {
-                rooms = roomService.getAllRoomsBySeatsNumber(seatsNumber);
+                rooms = roomService.getAllRoomsBySeatsNumber((page-1)*AMOUNT, AMOUNT, seatsNumber);
+                count = roomService.getRoomsCountBySeatsNumber(seatsNumber);
             }
 
-            request.setAttribute(ROOMS_ATTRIBUTE, rooms);
+            PagedList<Room> pagedList = new PagedList<>();
+            pagedList.setContent(rooms);
+            pagedList.setLastPage((int)Math.ceil(count/(double)AMOUNT));
+            pagedList.setCurrentPage(page);
+
+            request.setAttribute(ROOMS_ATTRIBUTE, pagedList);
         } catch (ServiceException e){
             logger.warn(e);
             request.setAttribute(SERVICE_ERROR_REQUEST_ATTR, true);

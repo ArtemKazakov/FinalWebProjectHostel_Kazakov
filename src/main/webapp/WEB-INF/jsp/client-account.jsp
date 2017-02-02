@@ -60,6 +60,8 @@
 <f:message bundle="${local}" key="local.clients" var="clients"/>
 <f:message bundle="${local}" key="local.deleteButton" var="deleteButton"/>
 <f:message bundle="${local}" key="local.editDiscount" var="editDiscount"/>
+<f:message bundle="${local}" key="local.invalidDiscountValue" var="invalidDiscountValue"/>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -67,7 +69,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${siteName}</title>
+    <title>${siteName} - ${personalInformation}</title>
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/img/hostel_icon.png" type="image/png">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
@@ -97,17 +99,21 @@
             <div class="col-md-6">
                 <h2>${personalInformation}</h2>
                 <ul class="list-group">
-                    <li class="list-group-item">${login}: ${requestScope.user.login}</li>
-                    <li class="list-group-item">${banned}: <span
+                    <li class="list-group-item"><strong>${login}:</strong> ${requestScope.user.login}</li>
+                    <li class="list-group-item"><strong>${banned}:</strong> <span
                             class="glyphicon <c:if test="${requestScope.user.banned == true}">glyphicon-ok</c:if> <c:if test="${requestScope.user.banned == false}">glyphicon-remove</c:if>"></span>
                     </li>
-                    <li class="list-group-item">${visitsNumber}: ${requestScope.user.visitsNumber}</li>
-                    <li class="list-group-item">${passportIdNumber}: ${requestScope.user.passport.identificationNumber}</li>
-                    <li class="list-group-item">${passportSeries}: ${requestScope.user.passport.series}</li>
-                    <li class="list-group-item">${surname}: ${requestScope.user.passport.surname}</li>
-                    <li class="list-group-item">${name}: ${requestScope.user.passport.name}</li>
-                    <li class="list-group-item">${patronymic}: ${requestScope.user.passport.patronymic}</li>
-                    <li class="list-group-item">${birthdayDate}: ${requestScope.user.passport.birthday}</li>
+                    <li class="list-group-item"><strong>${visitsNumber}:</strong> ${requestScope.user.visitsNumber}</li>
+                    <li class="list-group-item">
+                        <strong>${passportIdNumber}:</strong> ${requestScope.user.passport.identificationNumber}</li>
+                    <li class="list-group-item"><strong>${passportSeries}:</strong> ${requestScope.user.passport.series}
+                    </li>
+                    <li class="list-group-item"><strong>${surname}:</strong> ${requestScope.user.passport.surname}</li>
+                    <li class="list-group-item"><strong>${name}:</strong> ${requestScope.user.passport.name}</li>
+                    <li class="list-group-item"><strong>${patronymic}:</strong> ${requestScope.user.passport.patronymic}
+                    </li>
+                    <li class="list-group-item"><strong>${birthdayDate}:</strong> ${requestScope.user.passport.birthday}
+                    </li>
                 </ul>
             </div>
             <div class="col-md-6">
@@ -136,7 +142,8 @@
                                                     <h4 class="modal-title">${editDiscount}</h4>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form action="Controller" method="post">
+                                                    <form action="${pageContext.request.contextPath}/Controller"
+                                                          method="post">
                                                         <input type="hidden" name="command" value="editDiscount"/>
                                                         <input type="hidden" name="userId"
                                                                value="${requestScope.user.id}">
@@ -145,9 +152,12 @@
                                                             <label for="discountEditValue">${value}:</label>
                                                             <input name="value" type="number" value="${discount.value}"
                                                                    max="1000" min="1" class="form-control"
-                                                                   id="discountEditValue">
+                                                                   id="discountEditValue"
+                                                                   title="${invalidDiscountValue}" required
+                                                                   oninvalid='this.setCustomValidity("${emptyField} ${invalidDiscountValue}")'
+                                                                   onchange="try{this.setCustomValidity('')}catch(e){}">
                                                         </div>
-                                                        <div class="form-group">
+                                                        <div class=" form-group">
                                                             <button type="submit"
                                                                     class="btn btn-default">${saveButton}</button>
                                                         </div>
@@ -177,7 +187,10 @@
                         <div class="form-group">
                             <label for="discountValue">${value}:</label>
                             <input name="discountFormValue" type="number" value="0"
-                                   max="1000" min="1" class="form-control" id="discountValue">
+                                   max="1000" min="1" class="form-control" id="discountValue"
+                                   title="${invalidDiscountValue}" required
+                                   oninvalid='this.setCustomValidity("${emptyField} ${invalidDiscountValue}")'
+                                   onchange="try{this.setCustomValidity('')}catch(e){}">
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-default">${applyButton}</button>
@@ -209,82 +222,115 @@
                         <h4 class="modal-title">${editInformation}</h4>
                     </div>
                     <div class="modal-body">
-                        <form onsubmit="return checkPassword('${repeatPasswordError}')" action="${pageContext.request.contextPath}/Controller"
+                        <form onsubmit="return checkPassword('${repeatPasswordError}')"
+                              action="${pageContext.request.contextPath}/Controller"
                               method="post">
                             <input type="hidden" name="command" value="editUser"/>
                             <input type="hidden" name="userId" value="${requestScope.user.id}">
                             <div class="form-group">
                                 <label for="login">${login}:</label>
-                                <input name="editFormLogin" type="text" value="${requestScope.user.login}" minlength="5"
-                                       maxlength="40" class="form-control" id="login" pattern="^[a-zA-Z][a-zA-Z0-9_]+$"
-                                       title="${invalidLogin}" required
-                                       oninvalid='this.setCustomValidity("${emptyField} ${invalidLogin}")'
-                                       onchange="try{this.setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                    <input name="editFormLogin" type="text" value="${requestScope.user.login}"
+                                           minlength="5"
+                                           maxlength="40" class="form-control" id="login"
+                                           pattern="^[a-zA-Z][a-zA-Z0-9_]+$"
+                                           title="${invalidLogin}" required
+                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidLogin}")'
+                                           onchange="try{this.setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="password">${password}:</label>
-                                <input name="editFormPassword" type="password" minlength="6" maxlength="45"
-                                       class="form-control" id="password"
-                                       pattern="(?=^.{6,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$"
-                                       title="${invalidPassword}" required
-                                       oninvalid="this.setCustomValidity('${emptyField} ${invalidPassword}')"
-                                       onchange="try{this.setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                                    <input name="editFormPassword" type="password" minlength="6" maxlength="45"
+                                           class="form-control" id="password"
+                                           pattern="(?=^.{6,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$"
+                                           title="${invalidPassword}" required
+                                           oninvalid="this.setCustomValidity('${emptyField} ${invalidPassword}')"
+                                           onchange="try{this.setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="repeatPassword">${repeatPassword}:</label>
-                                <input name="editFormRepeatPassword" type="password" minlength="6" maxlength="45"
-                                       class="form-control" id="repeatPassword" required
-                                       oninvalid="this.setCustomValidity('${emptyField}')"
-                                       onchange="try{setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                                    <input name="editFormRepeatPassword" type="password" minlength="6" maxlength="45"
+                                           class="form-control" id="repeatPassword" required
+                                           oninvalid="this.setCustomValidity('${emptyField}')"
+                                           onchange="try{setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="identification-number">${passportIdNumber}:</label>
-                                <input name="editFormIdentificationNumber" type="number"
-                                       value="${requestScope.user.passport.identificationNumber}" min="1000000"
-                                       max="9999999" class="form-control" id="identification-number"
-                                       title="${invalidPassportNumber}" required
-                                       oninvalid="this.setCustomValidity('${emptyField} ${invalidPassportNumber}')"
-                                       onchange="try{setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+                                    <input name="editFormIdentificationNumber" type="number"
+                                           value="${requestScope.user.passport.identificationNumber}" min="1000000"
+                                           max="9999999" class="form-control" id="identification-number"
+                                           title="${invalidPassportNumber}" required
+                                           oninvalid="this.setCustomValidity('${emptyField} ${invalidPassportNumber}')"
+                                           onchange="try{setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="series">${passportSeries}:</label>
-                                <input name="editFormSeries" type="text" value="${requestScope.user.passport.series}"
-                                       minlength="2" maxlength="2" class="form-control" id="series" pattern="^[A-Z]+$"
-                                       title="${invalidSeries}" required
-                                       oninvalid="this.setCustomValidity('${emptyField} ${invalidSeries}')"
-                                       onchange="try{setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-paperclip"></i></span>
+                                    <input name="editFormSeries" type="text"
+                                           value="${requestScope.user.passport.series}"
+                                           minlength="2" maxlength="2" class="form-control" id="series"
+                                           pattern="^[A-Z]+$"
+                                           title="${invalidSeries}" required
+                                           oninvalid="this.setCustomValidity('${emptyField} ${invalidSeries}')"
+                                           onchange="try{setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="surname">${surname}:</label>
-                                <input name="editFormSurname" type="text" value="${requestScope.user.passport.surname}"
-                                       minlength="2" maxlength="40" class="form-control" id="surname"
-                                       pattern="^[a-zA-Zа-яёА-ЯЁ\s\-]+$" title="${invalidName}" required
-                                       oninvalid='this.setCustomValidity("${emptyField} ${invalidName}")'
-                                       onchange="try{setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                    <input name="editFormSurname" type="text"
+                                           value="${requestScope.user.passport.surname}"
+                                           minlength="2" maxlength="40" class="form-control" id="surname"
+                                           pattern="^[a-zA-Zа-яёА-ЯЁ\s\-]+$" title="${invalidName}" required
+                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidName}")'
+                                           onchange="try{setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="name">${name}:</label>
-                                <input name="editFormName" type="text" value="${requestScope.user.passport.name}"
-                                       minlength="2" maxlength="40" class="form-control" id="name"
-                                       pattern="^[a-zA-Zа-яёА-ЯЁ\s\-]+$" title="${invalidName}" required
-                                       oninvalid='this.setCustomValidity("${emptyField} ${invalidName}")'
-                                       onchange="try{setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                    <input name="editFormName" type="text" value="${requestScope.user.passport.name}"
+                                           minlength="2" maxlength="40" class="form-control" id="name"
+                                           pattern="^[a-zA-Zа-яёА-ЯЁ\s\-]+$" title="${invalidName}" required
+                                           oninvalid='this.setCustomValidity("${emptyField} ${invalidName}")'
+                                           onchange="try{setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="patronymic">${patronymic}:</label>
-                                <input name="editFormPatronymic" type="text"
-                                       value="${requestScope.user.passport.patronymic}" minlength="2" maxlength="40"
-                                       class="form-control" id="patronymic" pattern="^[a-zA-Zа-яёА-ЯЁ\s\-]+$"
-                                       title="${invalidName}" oninvalid='this.setCustomValidity("${invalidName}")'
-                                       onchange="try{setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                    <input name="editFormPatronymic" type="text"
+                                           value="${requestScope.user.passport.patronymic}" minlength="2" maxlength="40"
+                                           class="form-control" id="patronymic" pattern="^[a-zA-Zа-яёА-ЯЁ\s\-]+$"
+                                           title="${invalidName}" oninvalid='this.setCustomValidity("${invalidName}")'
+                                           onchange="try{setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="date">${birthdayDate}:</label>
-                                <input name="editFormBirthdayDate" type="date"
-                                       value="${requestScope.user.passport.birthday}"
-                                       max="1998-01-01" min="1920-01-01" class="form-control" id="date" required
-                                       oninvalid="this.setCustomValidity('${emptyField}')"
-                                       onchange="try{setCustomValidity('')}catch(e){}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                    <input name="editFormBirthdayDate" type="date"
+                                           value="${requestScope.user.passport.birthday}"
+                                           max="1998-01-01" min="1920-01-01" class="form-control" id="date" required
+                                           oninvalid="this.setCustomValidity('${emptyField}')"
+                                           onchange="try{setCustomValidity('')}catch(e){}">
+                                </div>
                             </div>
                             <div id="err-password"></div>
                             <div class="form-group">

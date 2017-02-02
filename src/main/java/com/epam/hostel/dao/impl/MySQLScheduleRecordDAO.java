@@ -30,9 +30,13 @@ public class MySQLScheduleRecordDAO extends MySQLDAO implements ScheduleRecordDA
 
     private static final String SELECT_ALL_SCHEDULE_RECORDS_QUERY = "SELECT * FROM `sсhedule_records` ";
 
+    private static final String SELECT_ALL_SCHEDULE_RECORDS_LIMITED_QUERY = "SELECT * FROM `sсhedule_records` LIMIT ?, ?;";
+
     private static final String DELETE_SCHEDULE_RECORD_BY_ID_QUERY = "DELETE FROM `sсhedule_records` WHERE `id_record` = ? ";
 
     private static final String DELETE_SCHEDULE_RECORD_BY_RENTAL_REQUEST_ID_QUERY = "DELETE FROM `sсhedule_records` WHERE `id_request` = ? ";
+
+    private static final String SELECT_COUNT_OF_SCHEDULE_RECORDS = "SELECT COUNT(*) FROM `sсhedule_records`;";
 
     private DataSource dataSource = (DataSource) TransactionManagerImpl.getInstance();
 
@@ -145,6 +149,26 @@ public class MySQLScheduleRecordDAO extends MySQLDAO implements ScheduleRecordDA
     }
 
     /**
+     * Gives a list of all schedule records from a database.
+     *
+     * @param start a number from which entries will be returned
+     * @param amount of entries
+     * @return a {@link List} of schedule records
+     * @throws DAOException in case of some exception with
+     *                      a database or a connection with it
+     */
+    @Override
+    public List<ScheduleRecord> findAllLimited(int start, int amount) throws DAOException {
+        return select(dataSource, SELECT_ALL_SCHEDULE_RECORDS_LIMITED_QUERY, "DAO layer: cannot select all schedule records",
+                preparedStatement -> {
+                    preparedStatement.setInt(1, start);
+                    preparedStatement.setInt(2, amount);
+                },
+                this :: createScheduleRecord
+        );
+    }
+
+    /**
      * Gives a list of schedule records from a database by check in date and check out date.
      *
      * @param checkInDate  a check in date in finding record
@@ -161,6 +185,26 @@ public class MySQLScheduleRecordDAO extends MySQLDAO implements ScheduleRecordDA
                     preparedStatement.setDate(2, new Date(checkInDate.getTime()));
                 },
                 this :: createScheduleRecord
+        );
+    }
+
+    /**
+     * Gives number of schedule records in a database.
+     *
+     * @return count of schedule records
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    @Override
+    public int selectScheduleRecordCount() throws DAOException {
+        return this.singleSelect(
+                dataSource,
+                SELECT_COUNT_OF_SCHEDULE_RECORDS,
+                "Can't get count of schedule records",
+                resultSet -> {
+                    resultSet.next();
+                    return resultSet.getInt(1);
+                }
         );
     }
 

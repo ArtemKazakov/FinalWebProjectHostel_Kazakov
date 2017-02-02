@@ -50,11 +50,25 @@ public interface RoomDAO {
     /**
      * Gives a list of all rooms from a data source.
      *
+     * @param start a number from which entries will be returned
+     * @param amount of entries
      * @return a {@link List} of rooms
      * @throws DAOException in case of some exception with
      *                      a data source or a connection with it
      */
     List<Room> findAll(int start, int amount) throws DAOException;
+
+    /**
+     * Gives a list of rooms from a data source by seats number.
+     *
+     * @param start a number from which entries will be returned
+     * @param amount of entries
+     * @param seatsNumber a seats number of desired rooms
+     * @return a {@link List} of rooms containing the necessary data
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    List<Room> findBySeatsNumberLimited(int start, int amount, int seatsNumber) throws DAOException;
 
     /**
      * Gives a list of rooms from a data source by seats number.
@@ -65,5 +79,25 @@ public interface RoomDAO {
      *                      a data source or a connection with it
      */
     List<Room> findBySeatsNumber(int seatsNumber) throws DAOException;
+
+
+    /**
+     * Gives number of rooms in a data source.
+     *
+     * @return count of rooms
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    int selectRoomCount() throws DAOException;
+
+    /**
+     * Gives number of rooms in a data source.
+     *
+     * @param seatsNumber a seats number of desired rooms
+     * @return count of rooms
+     * @throws DAOException in case of some exception with
+     *                      a data source or a connection with it
+     */
+    int selectRoomCountBySeatsNumber(int seatsNumber) throws DAOException;
 
 }

@@ -54,9 +54,19 @@ public interface UserService {
     /**
      * Return all users from a data source
      *
+     * @param start  the number from which accounts will be returned
+     * @param amount of users
      * @return a {@link List} of users
      * @throws ServiceException in case of error occurred with a data source
      *                          or validation of data
      */
-    List<User> getAllUsers() throws ServiceException;
+    List<User> getAllUsers(int start, int amount) throws ServiceException;
+
+    /**
+     * Returns number of users in data source.
+     *
+     * @return amount of users
+     * @throws ServiceException if error occurred with data source
+     */
+    int getUsersCount() throws ServiceException;
 }

@@ -4,6 +4,7 @@ import com.epam.hostel.bean.entity.Discount;
 import com.epam.hostel.bean.entity.RentalRequest;
 import com.epam.hostel.bean.entity.User;
 import com.epam.hostel.command.Command;
+import com.epam.hostel.command.util.CommandHelper;
 import com.epam.hostel.command.util.LanguageUtil;
 import com.epam.hostel.command.util.QueryUtil;
 import com.epam.hostel.service.DiscountService;
@@ -39,6 +40,11 @@ public class UserAccountCommand implements Command {
     private static final String SERVICE_ERROR_REQUEST_ATTR = "serviceError";
     private static final String USER_REQUEST_ATTR = "user";
 
+    private static final String PAGE_PARAM = "page";
+
+    private static final int AMOUNT = 10;
+    private static final int DEFAULT_PAGE = 1;
+
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -46,6 +52,11 @@ public class UserAccountCommand implements Command {
         if(session == null) {
             response.sendRedirect(MAIN_PAGE);
             return;
+        }
+
+        int page = CommandHelper.getInt(request.getParameter(PAGE_PARAM));
+        if (page == -1){
+            page = DEFAULT_PAGE;
         }
 
         QueryUtil.saveCurrentQueryToSession(request);

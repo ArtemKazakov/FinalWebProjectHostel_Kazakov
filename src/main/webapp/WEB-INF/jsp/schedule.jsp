@@ -38,6 +38,10 @@
 <f:message bundle="${local}" key="local.closeButton" var="closeButton"/>
 <f:message bundle="${local}" key="local.request" var="request"/>
 <f:message bundle="${local}" key="local.showRequestInfo" var="showRequestInfo"/>
+<f:message bundle="${local}" key="local.next" var="next"/>
+<f:message bundle="${local}" key="local.last" var="last"/>
+<f:message bundle="${local}" key="local.first" var="first"/>
+<f:message bundle="${local}" key="local.prev" var="prev"/>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +49,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${siteName}</title>
+    <title>${siteName} - ${schedule}</title>
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/img/hostel_icon.png" type="image/png">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
@@ -80,7 +84,7 @@
             <th>${checkOutDate}</th>
             <th>${paymentDuty}</th>
         </tr>
-        <c:forEach var="scheduleRecord" items="${requestScope.scheduleRecords}">
+        <c:forEach var="scheduleRecord" items="${requestScope.scheduleRecords.content}">
             <tr>
                 <td>
                     <button onclick="viewRequest(${scheduleRecord.requestId})" class="btn btn-default" type="button"
@@ -95,7 +99,30 @@
             </tr>
         </c:forEach>
     </table>
-
+    <div class="ta_center">
+        <div class="btn-group">
+            <c:if test="${requestScope.scheduleRecords.currentPage != 1}">
+                <a href="${pageContext.request.contextPath}/Controller?command=viewScheduleRecords&page=1"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-fast-backward"></span> ${first}
+                </a>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewScheduleRecords&page=${requestScope.scheduleRecords.currentPage - 1}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-chevron-left"></span> ${prev}
+                </a>
+            </c:if>
+            <c:if test="${requestScope.scheduleRecords.lastPage > requestScope.scheduleRecords.currentPage}">
+                <a href="${pageContext.request.contextPath}/Controller?command=viewScheduleRecords&page=${requestScope.scheduleRecords.currentPage +1}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon-chevron-right"></span> ${next}
+                </a>
+                <a href="${pageContext.request.contextPath}/Controller?command=viewScheduleRecords&page=${requestScope.scheduleRecords.lastPage}"
+                   class="btn btn-default">
+                    <span class="glyphicon glyphicon glyphicon-fast-forward"></span> ${last}
+                </a>
+            </c:if>
+        </div>
+    </div>
 
     <div id="viewRequest" class="modal fade">
         <div class="modal-dialog">

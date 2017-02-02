@@ -76,18 +76,21 @@
         </c:if>
         <div class="ta_center">
             <h1>${mainPageTextHeader}</h1>
-            <div class="st1">${mainPageText1} <a href="${pageContext.request.contextPath}/Controller?command=registrationPage">${mainPageText2}</a>
+            <div class="st1">${mainPageText1}&nbsp<a
+                    href="${pageContext.request.contextPath}/Controller?command=registrationPage">${mainPageText2}</a>
                 <br> ${mainPageText3}</div>
             <br>
             <div class="row">
                 <div class="col-md-6">
-                    <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=1" class="banner">
+                    <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=1"
+                       class="banner">
                         <img src="${pageContext.request.contextPath}/img/room1.jpg" alt="${singleRoom}">
                         <div class="bann_capt"><span>${singleRoom}</span></div>
                     </a>
                 </div>
                 <div class="col-md-6">
-                    <a href="${pageContext.request.contextPath}/?command=viewRoomsList&seatsNumber=2" class="banner">
+                    <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=2"
+                       class="banner">
                         <img src="${pageContext.request.contextPath}/img/room2.jpg" alt="${doubleRoom}">
                         <div class="bann_capt"><span>${doubleRoom}</span></div>
                     </a>
@@ -95,13 +98,15 @@
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=3" class="banner">
+                    <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=3"
+                       class="banner">
                         <img src="${pageContext.request.contextPath}/img/room3.jpg" alt="${tripleRoom}">
                         <div class="bann_capt"><span>${tripleRoom}</span></div>
                     </a>
                 </div>
                 <div class="col-md-6">
-                    <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=4" class="banner">
+                    <a href="${pageContext.request.contextPath}/Controller?command=viewRoomsList&seatsNumber=4"
+                       class="banner">
                         <img src="${pageContext.request.contextPath}/img/room4.jpg" alt="${quadrupleRoom}">
                         <div class="bann_capt"><span>${quadrupleRoom}</span></div>
                     </a>

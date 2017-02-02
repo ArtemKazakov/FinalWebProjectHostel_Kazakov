@@ -116,6 +116,14 @@ public class EditUserCommand implements Command {
 
     }
 
+    /**
+     * Creates a {@link User} object.
+     *
+     * @param id       an id
+     * @param login    a login
+     * @param password a password
+     * @return a new user
+     */
     private User createUser(int id, String login, byte[] password) {
         User user = new User();
         user.setId(id);
@@ -124,6 +132,17 @@ public class EditUserCommand implements Command {
         return user;
     }
 
+    /**
+     * Creates a {@link Passport} object.
+     *
+     * @param identificationNumber an identification number
+     * @param series               a series
+     * @param surname              a surname
+     * @param name                 a name
+     * @param patronymic           a patronymic
+     * @param birthday             a birthday
+     * @return a new passport
+     */
     private Passport createPassport(int identificationNumber, String series,
                                     String surname, String name, String patronymic, Date birthday) {
         Passport passport = new Passport();
